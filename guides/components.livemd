@@ -1,0 +1,51 @@
+# Components
+
+```elixir
+Mix.install([
+  {:vega_lite, "~> 0.1.4"},
+  {:kino_vega_lite, path: "~/_/kino_vega_lite"}
+])
+
+alias VegaLite, as: Vl
+```
+
+## Kinos
+
+### VegaLite
+
+This integration automatically renders the `VegaLite` struct as a chart:
+
+```elixir
+Vl.new()
+|> Vl.data_from_values(iteration: 1..100, score: 1..100)
+|> Vl.mark(:line)
+|> Vl.encode_field(:x, "iteration", type: :quantitative)
+|> Vl.encode_field(:y, "score", type: :quantitative)
+```
+
+### Kino.VegaLite
+
+`Kino.VegaLite` allows you to wrap an empty graphic and then stream
+data to the chart:
+
+```elixir
+chart =
+  Vl.new(width: 400, height: 400)
+  |> Vl.mark(:line)
+  |> Vl.encode_field(:x, "x", type: :quantitative)
+  |> Vl.encode_field(:y, "y", type: :quantitative)
+  |> Kino.VegaLite.new()
+  |> Kino.render()
+
+for i <- 1..300 do
+  point = %{x: i / 10, y: :math.sin(i / 10)}
+  Kino.VegaLite.push(chart, point)
+  Process.sleep(25)
+end
+```
+
+## Smart cells
+
+The following Smart cells are available:
+
+* **Chart cell** - for building visualizations for tabular data
