@@ -1,7 +1,7 @@
 defmodule KinoVegaLite.ChartCellTest do
   use ExUnit.Case, async: true
 
-  import KinoTest
+  import Kino.Test
 
   alias KinoVegaLite.ChartCell
 

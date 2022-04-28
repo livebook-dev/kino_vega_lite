@@ -26,7 +26,7 @@ defmodule KinoVegaLite.MixProject do
 
   defp deps do
     [
-      {:kino, github: "livebook-dev/kino"},
+      {:kino, "~> 0.6.0"},
       {:table, "~> 0.1.0"},
       {:vega_lite, "~> 0.1.4"},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}

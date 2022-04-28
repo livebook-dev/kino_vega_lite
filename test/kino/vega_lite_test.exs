@@ -1,7 +1,7 @@
 defmodule Kino.VegaLiteTest do
   use ExUnit.Case, async: true
 
-  import KinoTest
+  import Kino.Test
 
   alias VegaLite, as: Vl
 
