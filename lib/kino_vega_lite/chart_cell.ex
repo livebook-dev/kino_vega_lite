@@ -27,7 +27,7 @@ defmodule KinoVegaLite.ChartCell do
       "chart_title" => attrs["chart_title"],
       "width" => attrs["width"],
       "height" => attrs["height"],
-      "chart_type" => layer["chart_type"] || "bar",
+      "chart_type" => layer["chart_type"] || "point",
       "data_variable" => layer["data_variable"],
       "x_field" => layer["x_field"],
       "y_field" => layer["y_field"],
