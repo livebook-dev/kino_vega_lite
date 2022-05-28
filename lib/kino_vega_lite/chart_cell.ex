@@ -21,28 +21,34 @@ defmodule KinoVegaLite.ChartCell do
 
   @impl true
   def init(attrs, ctx) do
-    layer = if attrs["layers"], do: List.first(attrs["layers"]), else: nil
-
-    fields = %{
+    root_fields = %{
       "chart_title" => attrs["chart_title"],
       "width" => attrs["width"],
-      "height" => attrs["height"],
-      "chart_type" => layer["chart_type"] || "point",
-      "data_variable" => layer["data_variable"],
-      "x_field" => layer["x_field"],
-      "y_field" => layer["y_field"],
-      "color_field" => layer["color_field"],
-      "x_field_type" => layer["x_field_type"],
-      "y_field_type" => layer["y_field_type"],
-      "color_field_type" => layer["color_field_type"],
-      "x_field_aggregate" => layer["x_field_aggregate"],
-      "y_field_aggregate" => layer["y_field_aggregate"],
-      "color_field_aggregate" => layer["color_field_aggregate"]
+      "height" => attrs["height"]
     }
+
+    layers =
+      attrs["layers"] ||
+        [
+          %{
+            "chart_type" => "point",
+            "data_variable" => nil,
+            "x_field" => nil,
+            "y_field" => nil,
+            "color_field" => nil,
+            "x_field_type" => nil,
+            "y_field_type" => nil,
+            "color_field_type" => nil,
+            "x_field_aggregate" => nil,
+            "y_field_aggregate" => nil,
+            "color_field_aggregate" => nil
+          }
+        ]
 
     ctx =
       assign(ctx,
-        fields: fields,
+        root_fields: root_fields,
+        layers: layers,
         data_options: [],
         vl_alias: nil,
         missing_dep: missing_dep()
@@ -66,7 +72,8 @@ defmodule KinoVegaLite.ChartCell do
   @impl true
   def handle_connect(ctx) do
     payload = %{
-      fields: ctx.assigns.fields,
+      root_fields: ctx.assigns.root_fields,
+      layers: ctx.assigns.layers,
       missing_dep: ctx.assigns.missing_dep,
       data_options: ctx.assigns.data_options
     }
@@ -78,35 +85,66 @@ defmodule KinoVegaLite.ChartCell do
   def handle_info({:scan_binding_result, data_options, vl_alias}, ctx) do
     ctx = assign(ctx, data_options: data_options, vl_alias: vl_alias)
 
-    updated_fields =
-      case {ctx.assigns.fields["data_variable"], data_options} do
+    first_layer = List.first(ctx.assigns.layers)
+
+    updated_layer =
+      case {first_layer["data_variable"], data_options} do
         {nil, [%{variable: data_variable} | _]} -> updates_for_data_variable(ctx, data_variable)
         _ -> %{}
       end
 
-    ctx = update(ctx, :fields, &Map.merge(&1, updated_fields))
+    ctx =
+      if updated_layer == %{},
+        do: ctx,
+        else: update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, [updated_layer]) end)
 
     broadcast_event(ctx, "set_available_data", %{
       "data_options" => data_options,
-      "fields" => updated_fields
+      "fields" => updated_layer
     })
 
     {:noreply, ctx}
   end
 
   @impl true
-  def handle_event("update_field", %{"field" => "data_variable", "value" => value}, ctx) do
-    updated_fields = updates_for_data_variable(ctx, value)
-    ctx = update(ctx, :fields, &Map.merge(&1, updated_fields))
-    broadcast_event(ctx, "update", %{"fields" => updated_fields})
+  def handle_event("update_field", %{"field" => field, "value" => value, "layer" => nil}, ctx) do
+    parsed_value = parse_value(field, value)
+    ctx = update(ctx, :root_fields, &Map.put(&1, field, parsed_value))
+    broadcast_event(ctx, "update_root", %{"fields" => %{field => parsed_value}})
 
     {:noreply, ctx}
   end
 
-  def handle_event("update_field", %{"field" => field, "value" => value}, ctx) do
+  def handle_event(
+        "update_field",
+        %{"field" => "data_variable", "value" => value, "layer" => idx},
+        ctx
+      ) do
+    idx = String.to_integer(idx)
+    updated_layer = updates_for_data_variable(ctx, value)
+    updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
+    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    broadcast_event(ctx, "update_layer", %{"idx" => 0, "fields" => updated_layer})
+
+    {:noreply, ctx}
+  end
+
+  def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx) do
     parsed_value = parse_value(field, value)
-    ctx = update(ctx, :fields, &Map.put(&1, field, parsed_value))
-    broadcast_event(ctx, "update", %{"fields" => %{field => parsed_value}})
+    idx = String.to_integer(idx)
+    updated_layers = put_in(ctx.assigns.layers, [Access.at(idx), field], parsed_value)
+    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => %{field => parsed_value}})
+
+    {:noreply, ctx}
+  end
+
+  def handle_event("add_layer", _, ctx) do
+    data_variable = List.first(ctx.assigns.layers)["data_variable"]
+    new_layer = updates_for_data_variable(ctx, data_variable)
+    updated_layers = List.insert_at(ctx.assigns.layers, -1, new_layer)
+    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
   end
@@ -122,6 +160,7 @@ defmodule KinoVegaLite.ChartCell do
       end
 
     %{
+      "chart_type" => "point",
       "data_variable" => value,
       "x_field" => x_field,
       "y_field" => y_field,
@@ -131,8 +170,7 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_type" => nil,
       "x_field_aggregate" => nil,
       "y_field_aggregate" => nil,
-      "color_field_aggregate" => nil,
-      "chart_title" => nil
+      "color_field_aggregate" => nil
     }
   end
 
@@ -157,15 +195,21 @@ defmodule KinoVegaLite.ChartCell do
 
   @impl true
   def to_attrs(ctx) do
-    ctx.assigns.fields
-    |> add_layer()
+    ctx.assigns.root_fields
+    |> Map.put("layers", ctx.assigns.layers)
     |> Map.put("vl_alias", ctx.assigns.vl_alias)
   end
 
   @impl true
-  def to_source(attrs) do
+  def to_source(%{"layers" => [_layer]} = attrs) do
     attrs
     |> extract_layer()
+    |> to_quoted()
+    |> Kino.SmartCell.quoted_to_string()
+  end
+
+  def to_source(attrs) do
+    attrs
     |> to_quoted()
     |> Kino.SmartCell.quoted_to_string()
   end
@@ -173,6 +217,30 @@ defmodule KinoVegaLite.ChartCell do
   defp to_quoted(%{"data_variable" => nil}) do
     quote do
     end
+  end
+
+  defp to_quoted(%{"layers" => layers} = attrs) do
+    {root, _layer} = Map.split(attrs, ["chart_title", "width", "height", "vl_alias"])
+    attrs = Map.new(root, fn {k, v} -> convert_field(k, v) end)
+
+    defaults = %{
+      "vl_alias" => root["vl_alias"],
+      "chart_title" => nil,
+      "width" => nil,
+      "height" => nil
+    }
+
+    root =
+      %{
+        field: nil,
+        name: :new,
+        module: attrs.vl_alias,
+        args: build_arg_root(width: attrs.width, height: attrs.height, title: attrs.chart_title)
+      }
+      |> build_root()
+
+    layers = for layer <- layers, do: to_quoted(Map.merge(defaults, layer))
+    apply_layers(root, layers)
   end
 
   defp to_quoted(attrs) do
@@ -233,6 +301,12 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
+  defp apply_layers(root, layers) do
+    quote do
+      unquote(root) |> Vl.layers(unquote(layers))
+    end
+  end
+
   defp build_arg_root(opts) do
     opts
     |> Enum.filter(&elem(&1, 1))
@@ -276,11 +350,6 @@ defmodule KinoVegaLite.ChartCell do
 
   defp encode(@count_field), do: :encode
   defp encode(_), do: :encode_field
-
-  defp add_layer(attrs) do
-    {root, layer} = Map.split(attrs, ["chart_title", "width", "height"])
-    Map.put(root, "layers", [layer])
-  end
 
   defp extract_layer(%{"layers" => [layer]} = attrs) do
     attrs
