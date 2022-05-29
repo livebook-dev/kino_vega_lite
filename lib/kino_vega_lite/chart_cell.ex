@@ -124,7 +124,7 @@ defmodule KinoVegaLite.ChartCell do
     updated_layer = updates_for_data_variable(ctx, value)
     updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
     ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
-    broadcast_event(ctx, "update_layer", %{"idx" => 0, "fields" => updated_layer})
+    broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_layer})
 
     {:noreply, ctx}
   end
@@ -143,6 +143,14 @@ defmodule KinoVegaLite.ChartCell do
     data_variable = List.first(ctx.assigns.layers)["data_variable"]
     new_layer = updates_for_data_variable(ctx, data_variable)
     updated_layers = List.insert_at(ctx.assigns.layers, -1, new_layer)
+    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
+
+    {:noreply, ctx}
+  end
+
+  def handle_event("remove_layer", %{"layer" => idx}, ctx) do
+    updated_layers = List.delete_at(ctx.assigns.layers, idx)
     ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 

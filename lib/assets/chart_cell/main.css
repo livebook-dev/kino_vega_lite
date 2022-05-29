@@ -13,6 +13,11 @@
   --gray-800: #1c2a3a;
 
   --blue-100: #ecf0ff;
+  --blue-600: #3e64ff;
+  --blue-700: #2d4cdb;
+
+  --red--600: #db1920;
+  --red-700: #bc1227;
 }
 
 .container {
@@ -24,6 +29,11 @@
 
 .row {
   display: flex;
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .root {
@@ -112,12 +122,11 @@ input[type=number] {
   flex-shrink: 3;
 }
 
-.button-blue {
+.button {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 1.25rem;
   padding-right: 1.25rem;
-  background-color: #2563EB;
   color: #ffffff;
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -126,11 +135,33 @@ input[type=number] {
   border-radius: 0.5rem;
   border-width: 1px;
   border-color: transparent;
+  margin-right: 15px;
+  margin-bottom: 5px;
 }
 
-.button-blue:hover {
-  background-color: #1D4ED8;
+.button:hover {
   cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 50%;
+  pointer-events: none;
+}
+
+.button.blue {
+  background-color: var(--blue-600);
+}
+
+.button.blue:hover {
+  background-color: var(--blue-700);
+}
+
+.button.red {
+  background-color: var(--red--600);
+}
+
+.button.red:hover {
+  background-color: var(--red-700);
 }
 
 .info-box {
