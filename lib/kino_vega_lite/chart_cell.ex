@@ -222,33 +222,44 @@ defmodule KinoVegaLite.ChartCell do
     |> Kino.SmartCell.quoted_to_string()
   end
 
-  defp to_quoted(%{"data_variable" => nil}) do
+  defp to_quoted(%{"x_field" => nil, "y_field" => nil}) do
     quote do
     end
   end
 
   defp to_quoted(%{"layers" => layers} = attrs) do
-    {root, _layer} = Map.split(attrs, ["chart_title", "width", "height", "vl_alias"])
-    attrs = Map.new(root, fn {k, v} -> convert_field(k, v) end)
+    attrs =
+      Map.take(attrs, ["chart_title", "width", "height", "vl_alias"])
+      |> Map.new(fn {k, v} -> convert_field(k, v) end)
 
-    defaults = %{
-      "vl_alias" => root["vl_alias"],
+    root = %{
+      field: nil,
+      name: :new,
+      module: attrs.vl_alias,
+      args: build_arg_root(width: attrs.width, height: attrs.height, title: attrs.chart_title)
+    }
+
+    layer_root = %{
+      "vl_alias" => attrs.vl_alias,
       "chart_title" => nil,
       "width" => nil,
       "height" => nil
     }
 
-    root =
-      %{
-        field: nil,
-        name: :new,
-        module: attrs.vl_alias,
-        args: build_arg_root(width: attrs.width, height: attrs.height, title: attrs.chart_title)
-      }
-      |> build_root()
+    root_data_variable = extract_root_data_variable(layers)
 
-    layers = for layer <- layers, do: to_quoted(Map.merge(defaults, layer))
-    apply_layers(root, layers)
+    layers =
+      if root_data_variable,
+        do: put_in(layers, [Access.all(), "data_variable"], nil),
+        else: layers
+
+    root =
+      if root_data_variable,
+        do: build_data_root(root, root_data_variable, layers, attrs.vl_alias),
+        else: build_root(root)
+
+    layers = for layer <- layers, do: to_quoted(Map.merge(layer_root, layer))
+    apply_layers(root, layers, attrs.vl_alias)
   end
 
   defp to_quoted(attrs) do
@@ -265,7 +276,7 @@ defmodule KinoVegaLite.ChartCell do
         field: :data,
         name: :data_from_values,
         module: attrs.vl_alias,
-        args: [Macro.var(attrs.data_variable, nil), [only: used_fields(attrs)]]
+        args: build_arg_data(attrs.data_variable, used_fields(attrs))
       },
       %{field: :mark, name: :mark, module: attrs.vl_alias, args: [attrs.chart_type]},
       %{
@@ -299,6 +310,15 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
+  defp build_data_root(root, variable, layers, vl_alias) do
+    quote do
+      unquote(build_root(root))
+      |> unquote(vl_alias).unquote(:data_from_values)(
+        unquote_splicing([Macro.var(variable, nil), [only: used_fields([], layers)]])
+      )
+    end
+  end
+
   defp apply_node(%{args: nil}, acc), do: acc
 
   defp apply_node(%{field: field, name: function, module: module, args: args}, acc) do
@@ -309,9 +329,11 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
-  defp apply_layers(root, layers) do
+  defp apply_layers(root, layers, vl_alias) do
+    layers = Enum.reject(layers, &(&1 == {:__block__, [], []}))
+
     quote do
-      unquote(root) |> Vl.layers(unquote(layers))
+      unquote(root) |> unquote(vl_alias).layers(unquote(layers))
     end
   end
 
@@ -323,6 +345,9 @@ defmodule KinoVegaLite.ChartCell do
       opts -> [opts]
     end
   end
+
+  defp build_arg_data(nil, _), do: nil
+  defp build_arg_data(variable, fields), do: [Macro.var(variable, nil), [only: fields]]
 
   defp build_arg_field(nil, _, _), do: nil
   defp build_arg_field(@count_field, _, _), do: [[aggregate: :count]]
@@ -336,6 +361,15 @@ defmodule KinoVegaLite.ChartCell do
         value = attrs[attr],
         value not in [nil, @count_field],
         do: value
+  end
+
+  defp used_fields(acc, []) do
+    acc |> List.flatten() |> Enum.reject(&(&1 in [nil, @count_field])) |> Enum.uniq()
+  end
+
+  defp used_fields(acc, [layer | layers]) do
+    acc = [Enum.map(["x_field", "y_field", "color_field"], &Map.get(layer, &1)) | acc]
+    used_fields(acc, layers)
   end
 
   defp missing_dep() do
@@ -363,5 +397,16 @@ defmodule KinoVegaLite.ChartCell do
     attrs
     |> Map.delete("layers")
     |> Map.merge(layer)
+  end
+
+  defp extract_root_data_variable(layers) do
+    data_variable = get_in(layers, [Access.at(0), "data_variable"])
+
+    get_in(layers, [Access.all(), "data_variable"])
+    |> Enum.all?(&(&1 == data_variable))
+    |> case do
+      true -> String.to_atom(data_variable)
+      _ -> nil
+    end
   end
 end
