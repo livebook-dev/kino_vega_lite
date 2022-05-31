@@ -31,11 +31,6 @@
   display: flex;
 }
 
-.controls {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .root {
   display: flex;
   background-color: var(--blue-100);
@@ -123,11 +118,8 @@ input[type=number] {
 }
 
 .button {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  color: #ffffff;
+  padding: 0.5rem 1.25rem;
+  color: var(--gray-50);
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
@@ -137,6 +129,13 @@ input[type=number] {
   border-color: transparent;
   margin-right: 15px;
   margin-bottom: 5px;
+  background-color: var(--gray-100);
+}
+
+.button--sm {
+  padding: 0.25rem 0.5rem;
+  font-weight: 400;
+  font-size: 0.85rem;
 }
 
 .button:hover {
@@ -148,20 +147,28 @@ input[type=number] {
   pointer-events: none;
 }
 
-.button.blue {
+.button--blue {
   background-color: var(--blue-600);
 }
 
-.button.blue:hover {
+.button--blue:hover {
   background-color: var(--blue-700);
 }
 
-.button.red {
+.button--red {
   background-color: var(--red--600);
 }
 
-.button.red:hover {
+.button--red:hover {
   background-color: var(--red-700);
+}
+
+.button--gray {
+  color: var(--gray-500);
+}
+
+.button--transparent {
+  background-color: transparent;
 }
 
 .info-box {
@@ -218,4 +225,71 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.accordion-control {
+  display: flex;
+  margin-left: 0.75rem;
+  margin-left: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 97%;
+}
+
+.accordion-svg {
+  transition-property: all;
+  transition-duration: 200ms;
+  width: 0.75rem;
+  margin-left: 0.75rem;
+  padding: 10px;
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+}
+
+.accordion-svg:hover {
+  background-color: var(--gray-300);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.rotate-0 {
+  transform: rotate(0deg);
+}
+
+.highlight {
+  color: var(--gray-600);
+}
+
+.layer-content {
+  margin-top: -15px;
+}
+
+.layer-wrapper {
+  border: 1px solid var(--gray-100);
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+.wrapper--closed {
+  border: none;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
+.add-layer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.remove-layer {
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+  margin-top: 20px;
+  margin-left: 10px;
+  height: 50%;
 }
