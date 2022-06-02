@@ -189,9 +189,77 @@ defmodule KinoVegaLite.ChartCellTest do
     end
   end
 
+  describe "code generation for layers" do
+    test "two layers with same data" do
+      attrs =
+        build_layers_attrs(%{
+          "x_field" => nil,
+          "y_field" => "c",
+          "chart_type" => "rule",
+          "color_field" => "__count__"
+        })
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.data_from_values(data, only: ["a", "b", "c"])
+             |> VegaLite.layers([
+               VegaLite.new()
+               |> VegaLite.mark(:bar)
+               |> VegaLite.encode_field(:x, "a")
+               |> VegaLite.encode_field(:y, "b"),
+               VegaLite.new()
+               |> VegaLite.mark(:rule)
+               |> VegaLite.encode_field(:y, "c")
+               |> VegaLite.encode(:color, aggregate: :count)
+             ])\
+             """
+    end
+
+    test "two layers with different data" do
+      attrs = build_layers_attrs(%{"data_variable" => "cats", "x_field" => "c", "y_field" => "d"})
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.layers([
+               VegaLite.new()
+               |> VegaLite.data_from_values(data, only: ["a", "b"])
+               |> VegaLite.mark(:bar)
+               |> VegaLite.encode_field(:x, "a")
+               |> VegaLite.encode_field(:y, "b"),
+               VegaLite.new()
+               |> VegaLite.data_from_values(cats, only: ["c", "d"])
+               |> VegaLite.mark(:bar)
+               |> VegaLite.encode_field(:x, "c")
+               |> VegaLite.encode_field(:y, "d")
+             ])\
+             """
+    end
+
+    test "do not generate code for empty layers" do
+      attrs = build_layers_attrs(%{"x_field" => nil, "y_field" => nil})
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.data_from_values(data, only: ["a", "b"])
+             |> VegaLite.layers([
+               VegaLite.new()
+               |> VegaLite.mark(:bar)
+               |> VegaLite.encode_field(:x, "a")
+               |> VegaLite.encode_field(:y, "b")
+             ])\
+             """
+    end
+  end
+
   defp build_attrs(root_attrs \\ %{}, layer_attrs) do
     root_attrs = Map.merge(@root, root_attrs)
     layer_attrs = Map.merge(@layer, layer_attrs)
     Map.put(root_attrs, "layers", [layer_attrs])
+  end
+
+  defp build_layers_attrs(root_attrs \\ %{}, layer_attrs) do
+    root_attrs = Map.merge(@root, root_attrs)
+    layer_attrs = Map.merge(@layer, layer_attrs)
+    Map.put(root_attrs, "layers", [@layer, layer_attrs])
   end
 end

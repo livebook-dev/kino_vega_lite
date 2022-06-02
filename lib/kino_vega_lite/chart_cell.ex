@@ -314,7 +314,7 @@ defmodule KinoVegaLite.ChartCell do
     quote do
       unquote(build_root(root))
       |> unquote(vl_alias).unquote(:data_from_values)(
-        unquote_splicing([Macro.var(variable, nil), [only: used_fields([], layers)]])
+        unquote_splicing([Macro.var(variable, nil), [only: root_used_fields(layers)]])
       )
     end
   end
@@ -363,13 +363,13 @@ defmodule KinoVegaLite.ChartCell do
         do: value
   end
 
-  defp used_fields(acc, []) do
-    acc |> List.flatten() |> Enum.reject(&(&1 in [nil, @count_field])) |> Enum.uniq()
-  end
-
-  defp used_fields(acc, [layer | layers]) do
-    acc = [Enum.map(["x_field", "y_field", "color_field"], &Map.get(layer, &1)) | acc]
-    used_fields(acc, layers)
+  defp root_used_fields(layers) do
+    for layer <- layers,
+        attr <- ["x_field", "y_field", "color_field"],
+        value = layer[attr],
+        value not in [nil, @count_field],
+        uniq: true,
+        do: value
   end
 
   defp missing_dep() do
