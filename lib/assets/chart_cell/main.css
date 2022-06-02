@@ -22,6 +22,7 @@
   border-bottom: solid 1px var(--gray-200);
   border-radius: 0.5rem;
   background-color: rgba(248, 250, 252, 0.3);
+  padding-bottom: 12px;
 }
 
 .row {
@@ -139,6 +140,15 @@ input[type=number] {
   pointer-events: none;
 }
 
+.button--sm {
+  margin: 0;
+  margin-left: 0.45rem;
+  padding: 5px 10px;
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 5px;
+}
+
 .info-box {
   margin-bottom: 24px;
   padding: 16px;
@@ -201,7 +211,7 @@ input::-webkit-inner-spin-button {
   align-items: center;
   justify-content: space-between;
   font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.25rem;
   border-radius: 7px;
   width: auto;
   flex-grow: 1;
@@ -212,27 +222,17 @@ input::-webkit-inner-spin-button {
   background-color: transparent;
   position: relative;
   top: 42px;
-  left: 75%;
+  left: 74.5%;
   height: 0px;
   width: 24%;
 }
 
-.accordion-svg {
+.button-svg {
   transition-property: all;
   transition-duration: 200ms;
   width: 0.75rem;
   height: 0.75rem;
   color: var(--gray-600);
-  margin-left: 0.75rem;
-  padding: 10px;
-  background-color: var(--gray-100);
-  border: 1px solid var(--gray-200);
-  border-radius: 5px;
-}
-
-.accordion-svg:hover {
-  background-color: var(--gray-300);
-  cursor: pointer;
 }
 
 .rotate-180 {
@@ -252,6 +252,7 @@ input::-webkit-inner-spin-button {
   margin-left: 14px;
   margin-right: 14px;
   margin-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .layer-wrapper:last-child {
@@ -260,7 +261,7 @@ input::-webkit-inner-spin-button {
 }
 
 .wrapper--closed {
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   margin-top: 10px;
 }
 
