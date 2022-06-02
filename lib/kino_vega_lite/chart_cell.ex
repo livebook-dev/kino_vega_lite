@@ -120,7 +120,6 @@ defmodule KinoVegaLite.ChartCell do
         %{"field" => "data_variable", "value" => value, "layer" => idx},
         ctx
       ) do
-    idx = String.to_integer(idx)
     updated_layer = updates_for_data_variable(ctx, value)
     updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
     ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
@@ -131,7 +130,6 @@ defmodule KinoVegaLite.ChartCell do
 
   def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx) do
     parsed_value = parse_value(field, value)
-    idx = String.to_integer(idx)
     updated_layers = put_in(ctx.assigns.layers, [Access.at(idx), field], parsed_value)
     ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => %{field => parsed_value}})
@@ -142,7 +140,7 @@ defmodule KinoVegaLite.ChartCell do
   def handle_event("add_layer", _, ctx) do
     data_variable = List.first(ctx.assigns.layers)["data_variable"]
     new_layer = updates_for_data_variable(ctx, data_variable)
-    updated_layers = List.insert_at(ctx.assigns.layers, -1, new_layer)
+    updated_layers = ctx.assigns.layers ++ [new_layer]
     ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
@@ -360,6 +358,7 @@ defmodule KinoVegaLite.ChartCell do
     for attr <- [:x_field, :y_field, :color_field],
         value = attrs[attr],
         value not in [nil, @count_field],
+        uniq: true,
         do: value
   end
 
@@ -400,12 +399,10 @@ defmodule KinoVegaLite.ChartCell do
   end
 
   defp extract_root_data_variable(layers) do
-    data_variable = get_in(layers, [Access.at(0), "data_variable"])
-
     get_in(layers, [Access.all(), "data_variable"])
-    |> Enum.all?(&(&1 == data_variable))
+    |> Enum.dedup()
     |> case do
-      true -> String.to_atom(data_variable)
+      [data_variable] -> String.to_atom(data_variable)
       _ -> nil
     end
   end
