@@ -13,8 +13,6 @@
   --gray-800: #1c2a3a;
 
   --blue-100: #ecf0ff;
-  --blue-600: #3e64ff;
-  --blue-700: #2d4cdb;
 }
 
 .container {
@@ -222,7 +220,7 @@ input::-webkit-inner-spin-button {
   background-color: transparent;
   position: relative;
   top: 42px;
-  left: 74.5%;
+  left: 75%;
   height: 0px;
   width: 24%;
 }
