@@ -10,6 +10,7 @@
   --gray-400: #91a4b7;
   --gray-500: #61758a;
   --gray-600: #445668;
+  --gray-700: #304254;
   --gray-800: #1c2a3a;
 
   --blue-100: #ecf0ff;
@@ -140,11 +141,23 @@ input[type=number] {
 
 .button--sm {
   margin: 0;
-  margin-left: 0.45rem;
   padding: 5px 10px;
+  background: transparent;
+  position: relative;
+  left: 10px;
+}
+
+.button--sm:hover {
+  background: transparent;
+}
+
+.button--dashed {
+  background: transparent;
+  border: 1px dashed var(--gray-500);
+}
+
+.button--dashed:hover {
   background-color: var(--gray-100);
-  border: 1px solid var(--gray-200);
-  border-radius: 5px;
 }
 
 .info-box {
@@ -204,32 +217,23 @@ input::-webkit-inner-spin-button {
 }
 
 .accordion-control {
-  background-color: var(--gray-100);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  text-transform: uppercase;
   font-size: 0.875rem;
   padding: 0.25rem 0.25rem;
-  border-radius: 7px;
   width: auto;
   flex-grow: 1;
-  color: var(--gray-500);
-}
-
-.control--sm {
-  background-color: transparent;
-  position: relative;
-  top: 42px;
-  left: 75%;
-  height: 0px;
-  width: 24%;
+  color: var(--gray-700);
+  margin-bottom: 6px;
 }
 
 .button-svg {
   transition-property: all;
   transition-duration: 200ms;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.95rem;
+  height: 0.95rem;
   color: var(--gray-600);
 }
 
@@ -239,10 +243,6 @@ input::-webkit-inner-spin-button {
 
 .rotate-0 {
   transform: rotate(0deg);
-}
-
-.highlight {
-  color: var(--gray-600);
 }
 
 .layer-wrapper {
