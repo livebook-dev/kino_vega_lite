@@ -246,7 +246,7 @@ input::-webkit-inner-spin-button {
 }
 
 .layer-wrapper {
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-200);
   margin-left: 14px;
   margin-right: 14px;
   margin-bottom: 12px;
