@@ -168,11 +168,11 @@ defmodule KinoVegaLite.ChartCell do
     %{
       "chart_type" => "point",
       "data_variable" => value,
-      "x_field" => x_field,
-      "y_field" => y_field,
+      "x_field" => x_field.name,
+      "y_field" => y_field.name,
       "color_field" => nil,
-      "x_field_type" => nil,
-      "y_field_type" => nil,
+      "x_field_type" => x_field.type,
+      "y_field_type" => y_field.type,
       "color_field_type" => nil,
       "x_field_aggregate" => nil,
       "y_field_aggregate" => nil,
@@ -379,9 +379,10 @@ defmodule KinoVegaLite.ChartCell do
 
   defp columns_for(data) do
     with true <- implements?(Table.Reader, data),
-         {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         data = {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         types <- infer_types(data),
          true <- Enum.all?(columns, &implements?(String.Chars, &1)) do
-      Enum.map(columns, &to_string/1)
+      Enum.zip_with(columns, types, fn column, type -> %{name: to_string(column), type: type} end)
     else
       _ -> nil
     end
@@ -406,4 +407,27 @@ defmodule KinoVegaLite.ChartCell do
       _ -> nil
     end
   end
+
+  defp infer_types({:columns, %{columns: _columns}, data}) do
+    Enum.map(data, fn data -> Enum.to_list(data) |> List.first() |> type_of() end)
+  end
+
+  defp infer_types({:rows, %{columns: _columns}, data}) do
+    Enum.to_list(data)
+    |> List.first()
+    |> Enum.map(&type_of/1)
+  end
+
+  defp type_of(data) when is_number(data), do: "quantitative"
+
+  defp type_of(data) when is_binary(data) do
+    if date?(Date.from_iso8601(data)) || date?(DateTime.from_iso8601(data)),
+      do: "temporal",
+      else: "nominal"
+  end
+
+  defp type_of(_), do: nil
+
+  defp date?({:ok, _}), do: true
+  defp date?({:error, _}), do: false
 end
