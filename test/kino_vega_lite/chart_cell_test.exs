@@ -39,16 +39,33 @@ defmodule KinoVegaLite.ChartCellTest do
 
     row_data = [%{x: 1, y: 1}, %{x: 2, y: 2}]
     column_data = %{x: 1..2, y: 1..2}
+    temporal_data = %{x: ["cats", "dogs"], y: ["2022-01-01", "2020-01-01"]}
     invalid_data = %{self() => [1, 2], :y => [1, 2]}
 
-    binding = [row_data: row_data, column_data: column_data, invalid_data: invalid_data]
+    binding = [
+      row_data: row_data,
+      column_data: column_data,
+      temporal_data: temporal_data,
+      invalid_data: invalid_data
+    ]
+
     # TODO: Use Code.env_for_eval on Elixir v1.14+
     env = :elixir.env_for_eval([])
     ChartCell.scan_binding(kino.pid, binding, env)
 
     data_options = [
-      %{variable: "row_data", columns: ["x", "y"]},
-      %{variable: "column_data", columns: ["x", "y"]}
+      %{
+        variable: "row_data",
+        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}]
+      },
+      %{
+        variable: "column_data",
+        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}]
+      },
+      %{
+        variable: "temporal_data",
+        columns: [%{name: "x", type: "nominal"}, %{name: "y", type: "temporal"}]
+      }
     ]
 
     assert_broadcast_event(kino, "set_available_data", %{
@@ -56,7 +73,9 @@ defmodule KinoVegaLite.ChartCellTest do
       "fields" => %{
         "data_variable" => "row_data",
         "x_field" => "x",
-        "y_field" => "y"
+        "y_field" => "y",
+        "x_field_type" => "quantitative",
+        "y_field_type" => "quantitative"
       }
     })
   end

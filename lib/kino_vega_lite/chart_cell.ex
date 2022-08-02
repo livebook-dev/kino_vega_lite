@@ -18,6 +18,7 @@ defmodule KinoVegaLite.ChartCell do
   ]
 
   @count_field "__count__"
+  @typed_fields ["x_field", "y_field", "color_field"]
 
   @impl true
   def init(attrs, ctx) do
@@ -122,8 +123,18 @@ defmodule KinoVegaLite.ChartCell do
       ) do
     updated_layer = updates_for_data_variable(ctx, value)
     updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_layer})
+
+    {:noreply, ctx}
+  end
+
+  def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx)
+      when field in @typed_fields do
+    {updated_fields, updated_layer} = updates_for_typed_fields(ctx, field, idx, value)
+    updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
+    ctx = assign(ctx, layers: updated_layers)
+    broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_fields})
 
     {:noreply, ctx}
   end
@@ -131,7 +142,7 @@ defmodule KinoVegaLite.ChartCell do
   def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx) do
     parsed_value = parse_value(field, value)
     updated_layers = put_in(ctx.assigns.layers, [Access.at(idx), field], parsed_value)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => %{field => parsed_value}})
 
     {:noreply, ctx}
@@ -141,7 +152,7 @@ defmodule KinoVegaLite.ChartCell do
     data_variable = List.first(ctx.assigns.layers)["data_variable"]
     new_layer = updates_for_data_variable(ctx, data_variable)
     updated_layers = ctx.assigns.layers ++ [new_layer]
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
@@ -149,7 +160,7 @@ defmodule KinoVegaLite.ChartCell do
 
   def handle_event("remove_layer", %{"layer" => idx}, ctx) do
     updated_layers = List.delete_at(ctx.assigns.layers, idx)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
@@ -168,16 +179,37 @@ defmodule KinoVegaLite.ChartCell do
     %{
       "chart_type" => "point",
       "data_variable" => value,
-      "x_field" => x_field,
-      "y_field" => y_field,
+      "x_field" => x_field.name,
+      "y_field" => y_field.name,
       "color_field" => nil,
-      "x_field_type" => nil,
-      "y_field_type" => nil,
+      "x_field_type" => x_field.type,
+      "y_field_type" => y_field.type,
       "color_field_type" => nil,
       "x_field_aggregate" => nil,
       "y_field_aggregate" => nil,
       "color_field_aggregate" => nil
     }
+  end
+
+  defp updates_for_typed_fields(ctx, field, idx, value) do
+    layer = Enum.at(ctx.assigns.layers, idx)
+
+    columns =
+      Enum.find_value(
+        ctx.assigns.data_options,
+        [],
+        &(&1.variable == layer["data_variable"] && &1.columns)
+      )
+
+    type = Enum.find_value(columns, &(&1.name == value && &1.type))
+    field_type = "#{field}_type"
+    parsed_value = parse_value(field, value)
+    parsed_type = parse_value(field_type, type)
+
+    updated_fields = %{field => parsed_value, field_type => parsed_type}
+    updated_layer = Map.merge(layer, updated_fields)
+
+    {updated_fields, updated_layer}
   end
 
   defp parse_value(_field, ""), do: nil
@@ -379,9 +411,10 @@ defmodule KinoVegaLite.ChartCell do
 
   defp columns_for(data) do
     with true <- implements?(Table.Reader, data),
-         {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         data = {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         types <- infer_types(data),
          true <- Enum.all?(columns, &implements?(String.Chars, &1)) do
-      Enum.map(columns, &to_string/1)
+      Enum.zip_with(columns, types, fn column, type -> %{name: to_string(column), type: type} end)
     else
       _ -> nil
     end
@@ -406,4 +439,25 @@ defmodule KinoVegaLite.ChartCell do
       _ -> nil
     end
   end
+
+  defp infer_types({:columns, %{columns: _columns}, data}) do
+    Enum.map(data, fn data -> data |> Enum.at(0) |> type_of() end)
+  end
+
+  defp infer_types({:rows, %{columns: _columns}, data}) do
+    data
+    |> Enum.at(0)
+    |> Enum.map(&type_of/1)
+  end
+
+  defp type_of(data) when is_number(data), do: "quantitative"
+
+  defp type_of(data) when is_binary(data) do
+    if date?(data) or date_time?(data), do: "temporal", else: "nominal"
+  end
+
+  defp type_of(_), do: nil
+
+  defp date?(value), do: match?({:ok, _}, Date.from_iso8601(value))
+  defp date_time?(value), do: match?({:ok, _}, DateTime.from_iso8601(value))
 end
