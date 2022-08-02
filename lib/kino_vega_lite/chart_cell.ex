@@ -18,7 +18,7 @@ defmodule KinoVegaLite.ChartCell do
   ]
 
   @count_field "__count__"
-  @fields_with_types ["x_field", "y_field", "color_field"]
+  @typed_fields ["x_field", "y_field", "color_field"]
 
   @impl true
   def init(attrs, ctx) do
@@ -123,17 +123,17 @@ defmodule KinoVegaLite.ChartCell do
       ) do
     updated_layer = updates_for_data_variable(ctx, value)
     updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_layer})
 
     {:noreply, ctx}
   end
 
   def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx)
-      when field in @fields_with_types do
-    {updated_fields, updated_layer} = updates_for_field_with_types(ctx, field, idx, value)
+      when field in @typed_fields do
+    {updated_fields, updated_layer} = updates_for_typed_fields(ctx, field, idx, value)
     updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_fields})
 
     {:noreply, ctx}
@@ -142,7 +142,7 @@ defmodule KinoVegaLite.ChartCell do
   def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx) do
     parsed_value = parse_value(field, value)
     updated_layers = put_in(ctx.assigns.layers, [Access.at(idx), field], parsed_value)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => %{field => parsed_value}})
 
     {:noreply, ctx}
@@ -152,7 +152,7 @@ defmodule KinoVegaLite.ChartCell do
     data_variable = List.first(ctx.assigns.layers)["data_variable"]
     new_layer = updates_for_data_variable(ctx, data_variable)
     updated_layers = ctx.assigns.layers ++ [new_layer]
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
@@ -160,7 +160,7 @@ defmodule KinoVegaLite.ChartCell do
 
   def handle_event("remove_layer", %{"layer" => idx}, ctx) do
     updated_layers = List.delete_at(ctx.assigns.layers, idx)
-    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
@@ -191,8 +191,8 @@ defmodule KinoVegaLite.ChartCell do
     }
   end
 
-  defp updates_for_field_with_types(ctx, field, idx, value) do
-    layer = get_in(ctx.assigns.layers, [Access.at(idx)])
+  defp updates_for_typed_fields(ctx, field, idx, value) do
+    layer = Enum.at(ctx.assigns.layers, idx)
 
     columns =
       Enum.find_value(
@@ -201,7 +201,7 @@ defmodule KinoVegaLite.ChartCell do
         &(&1.variable == layer["data_variable"] && &1.columns)
       )
 
-    type = get_in(columns, [Access.filter(&(&1.name == value)), :type]) |> List.first()
+    type = Enum.find_value(columns, &(&1.name == value && &1.type))
     field_type = "#{field}_type"
     parsed_value = parse_value(field, value)
     parsed_type = parse_value(field_type, type)
@@ -441,25 +441,23 @@ defmodule KinoVegaLite.ChartCell do
   end
 
   defp infer_types({:columns, %{columns: _columns}, data}) do
-    Enum.map(data, fn data -> Enum.to_list(data) |> List.first() |> type_of() end)
+    Enum.map(data, fn data -> data |> Enum.at(0) |> type_of() end)
   end
 
   defp infer_types({:rows, %{columns: _columns}, data}) do
-    Enum.to_list(data)
-    |> List.first()
+    data
+    |> Enum.at(0)
     |> Enum.map(&type_of/1)
   end
 
   defp type_of(data) when is_number(data), do: "quantitative"
 
   defp type_of(data) when is_binary(data) do
-    if date?(Date.from_iso8601(data)) || date?(DateTime.from_iso8601(data)),
-      do: "temporal",
-      else: "nominal"
+    if date?(data) or date_time?(data), do: "temporal", else: "nominal"
   end
 
   defp type_of(_), do: nil
 
-  defp date?({:ok, _}), do: true
-  defp date?({:error, _}), do: false
+  defp date?(value), do: match?({:ok, _}, Date.from_iso8601(value))
+  defp date_time?(value), do: match?({:ok, _}, DateTime.from_iso8601(value))
 end
