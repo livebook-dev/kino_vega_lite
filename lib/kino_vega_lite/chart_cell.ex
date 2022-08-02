@@ -18,6 +18,7 @@ defmodule KinoVegaLite.ChartCell do
   ]
 
   @count_field "__count__"
+  @fields_with_types ["x_field", "y_field", "color_field"]
 
   @impl true
   def init(attrs, ctx) do
@@ -128,6 +129,16 @@ defmodule KinoVegaLite.ChartCell do
     {:noreply, ctx}
   end
 
+  def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx)
+      when field in @fields_with_types do
+    {updated_fields, updated_layer} = updates_for_field_with_types(ctx, field, idx, value)
+    updated_layers = List.replace_at(ctx.assigns.layers, idx, updated_layer)
+    ctx = update_in(ctx.assigns, fn assigns -> Map.put(assigns, :layers, updated_layers) end)
+    broadcast_event(ctx, "update_layer", %{"idx" => idx, "fields" => updated_fields})
+
+    {:noreply, ctx}
+  end
+
   def handle_event("update_field", %{"field" => field, "value" => value, "layer" => idx}, ctx) do
     parsed_value = parse_value(field, value)
     updated_layers = put_in(ctx.assigns.layers, [Access.at(idx), field], parsed_value)
@@ -178,6 +189,27 @@ defmodule KinoVegaLite.ChartCell do
       "y_field_aggregate" => nil,
       "color_field_aggregate" => nil
     }
+  end
+
+  defp updates_for_field_with_types(ctx, field, idx, value) do
+    layer = get_in(ctx.assigns.layers, [Access.at(idx)])
+
+    columns =
+      Enum.find_value(
+        ctx.assigns.data_options,
+        [],
+        &(&1.variable == layer["data_variable"] && &1.columns)
+      )
+
+    type = get_in(columns, [Access.filter(&(&1.name == value)), :type]) |> List.first()
+    field_type = "#{field}_type"
+    parsed_value = parse_value(field, value)
+    parsed_type = parse_value(field_type, type)
+
+    updated_fields = %{field => parsed_value, field_type => parsed_type}
+    updated_layer = Map.merge(layer, updated_fields)
+
+    {updated_fields, updated_layer}
   end
 
   defp parse_value(_field, ""), do: nil
