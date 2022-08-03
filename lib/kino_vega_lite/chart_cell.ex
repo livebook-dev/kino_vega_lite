@@ -450,6 +450,9 @@ defmodule KinoVegaLite.ChartCell do
     |> Enum.map(&type_of/1)
   end
 
+  defp type_of(%mod{}) when mod in [Decimal], do: "quantitative"
+  defp type_of(%mod{}) when mod in [Date, NaiveDateTime, DateTime], do: "temporal"
+
   defp type_of(data) when is_number(data), do: "quantitative"
 
   defp type_of(data) when is_binary(data) do
