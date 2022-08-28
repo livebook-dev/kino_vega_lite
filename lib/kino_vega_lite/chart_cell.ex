@@ -412,8 +412,8 @@ defmodule KinoVegaLite.ChartCell do
   defp columns_for(data) do
     with true <- implements?(Table.Reader, data),
          data = {_, %{columns: columns}, _} <- Table.Reader.init(data),
-         types <- infer_types(data),
          true <- Enum.all?(columns, &implements?(String.Chars, &1)) do
+      types = infer_types(data)
       Enum.zip_with(columns, types, fn column, type -> %{name: to_string(column), type: type} end)
     else
       _ -> nil
@@ -458,6 +458,8 @@ defmodule KinoVegaLite.ChartCell do
   defp type_of(data) when is_binary(data) do
     if date?(data) or date_time?(data), do: "temporal", else: "nominal"
   end
+
+  defp type_of(data) when is_atom(data), do: "nominal"
 
   defp type_of(_), do: nil
 
