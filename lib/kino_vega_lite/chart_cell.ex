@@ -444,7 +444,6 @@ defmodule KinoVegaLite.ChartCell do
     Enum.map(data, fn data -> data |> Enum.at(0) |> type_of() end)
   end
 
-
   defp infer_types({:rows, %{columns: columns}, data}) do
     case Enum.fetch(data, 0) do
       {:ok, row} -> Enum.map(row, &type_of/1)
