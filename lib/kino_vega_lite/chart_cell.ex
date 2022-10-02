@@ -411,7 +411,7 @@ defmodule KinoVegaLite.ChartCell do
 
   defp columns_for(data) do
     with true <- implements?(Table.Reader, data),
-         data = {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         data = {_, %{columns: [_ | _] = columns}, _} <- Table.Reader.init(data),
          true <- Enum.all?(columns, &implements?(String.Chars, &1)) do
       types = infer_types(data)
       Enum.zip_with(columns, types, fn column, type -> %{name: to_string(column), type: type} end)
@@ -444,10 +444,11 @@ defmodule KinoVegaLite.ChartCell do
     Enum.map(data, fn data -> data |> Enum.at(0) |> type_of() end)
   end
 
-  defp infer_types({:rows, %{columns: _columns}, data}) do
-    data
-    |> Enum.at(0)
-    |> Enum.map(&type_of/1)
+  defp infer_types({:rows, %{columns: columns}, data}) do
+    case Enum.fetch(data, 0) do
+      {:ok, row} -> Enum.map(row, &type_of/1)
+      :error -> Enum.map(columns, fn _ -> nil end)
+    end
   end
 
   defp type_of(%mod{}) when mod in [Decimal], do: "quantitative"
