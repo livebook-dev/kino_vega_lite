@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.1.4](https://github.com/livebook-dev/kino_vega_lite/tree/v0.1.4) (2022-10-07)
+
+### Changed
+
+* Updated Kino requirement
+
+### Fixed
+
+* Chart cell to handle empty data sets ([#20](https://github.com/livebook-dev/kino_vega_lite/pull/20))
+
 ## [v0.1.3](https://github.com/livebook-dev/kino_vega_lite/tree/v0.1.3) (2022-08-04)
 
 ### Added
