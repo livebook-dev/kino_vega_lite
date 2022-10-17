@@ -465,5 +465,5 @@ defmodule KinoVegaLite.ChartCell do
   defp type_of(_), do: nil
 
   defp date?(value), do: match?({:ok, _}, Date.from_iso8601(value))
-  defp date_time?(value), do: match?({:ok, _}, DateTime.from_iso8601(value))
+  defp date_time?(value), do: match?({:ok, _, _}, DateTime.from_iso8601(value))
 end
