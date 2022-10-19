@@ -331,3 +331,10 @@ input::-webkit-inner-spin-button {
     height: 24px;
   }
 }
+
+.field-settings {
+  background-color: var(--gray-100);
+  margin-top: -16px;
+  padding: 4px 8px;
+  border-radius: 0.5rem;
+}
