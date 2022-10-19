@@ -14,6 +14,9 @@
   --gray-800: #1c2a3a;
 
   --blue-100: #ecf0ff;
+  --blue-600: #3e64ff;
+
+  --red-300: #f1a3a6;
 }
 
 .container {
@@ -73,6 +76,15 @@ input[type=number] {
   font-weight: 500;
 }
 
+.inline-input-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--gray-800);
+  font-weight: 500;
+  padding-right: 6px;
+  font-size: 0.875rem;
+}
+
 .input--xs {
   width: 30%;
 }
@@ -99,6 +111,12 @@ input[type=number] {
 .field:first-child {
   flex-basis: 41%;
   margin-left: 4px;
+}
+
+.inline-field {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
 }
 
 .root-field {
@@ -316,6 +334,13 @@ input::-webkit-inner-spin-button {
   cursor: pointer;
 }
 
+.field-settings {
+  background-color: var(--gray-100);
+  margin-top: -16px;
+  padding: 4px 8px;
+  border-radius: 0.5rem;
+}
+
 /* Fix icon position - Safari 11+ */
 @media not all and (min-resolution: 0.001dpcm) {
   @supports (-webkit-appearance: none) and (stroke-color: transparent) {
@@ -330,11 +355,4 @@ input::-webkit-inner-spin-button {
   .icon-container {
     height: 24px;
   }
-}
-
-.field-settings {
-  background-color: var(--gray-100);
-  margin-top: -16px;
-  padding: 4px 8px;
-  border-radius: 0.5rem;
 }
