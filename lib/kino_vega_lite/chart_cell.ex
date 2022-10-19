@@ -42,7 +42,8 @@ defmodule KinoVegaLite.ChartCell do
             "color_field_type" => nil,
             "x_field_aggregate" => nil,
             "y_field_aggregate" => nil,
-            "color_field_aggregate" => nil
+            "color_field_aggregate" => nil,
+            "x_field_bin" => false
           }
         ]
 
@@ -187,7 +188,8 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_type" => nil,
       "x_field_aggregate" => nil,
       "y_field_aggregate" => nil,
-      "color_field_aggregate" => nil
+      "color_field_aggregate" => nil,
+      "x_field_bin" => false
     }
   end
 
