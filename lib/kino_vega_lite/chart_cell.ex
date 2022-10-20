@@ -374,6 +374,7 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_field(field, nil, aggregate), do: [field, [aggregate: aggregate]]
   defp build_arg_field(field, type, aggregate), do: [field, [type: type, aggregate: aggregate]]
 
+  defp build_bin_field(nil, _), do: nil
   defp build_bin_field(field, false), do: field
   defp build_bin_field([field | [opts]], true), do: [field, opts ++ [bin: true]]
 
