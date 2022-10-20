@@ -25,7 +25,8 @@ defmodule KinoVegaLite.ChartCellTest do
     "color_field_type" => nil,
     "x_field_aggregate" => nil,
     "y_field_aggregate" => nil,
-    "color_field_aggregate" => nil
+    "color_field_aggregate" => nil,
+    "x_field_bin" => false
   }
 
   test "returns no source when starting fresh with no data" do

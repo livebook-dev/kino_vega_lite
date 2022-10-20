@@ -316,6 +316,7 @@ defmodule KinoVegaLite.ChartCell do
         name: encode(attrs.x_field),
         module: attrs.vl_alias,
         args: build_arg_field(attrs.x_field, attrs.x_field_type, attrs.x_field_aggregate)
+        |> build_bin_field(attrs.x_field_bin)
       },
       %{
         field: :y,
@@ -387,6 +388,9 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_field(field, type, nil), do: [field, [type: type]]
   defp build_arg_field(field, nil, aggregate), do: [field, [aggregate: aggregate]]
   defp build_arg_field(field, type, aggregate), do: [field, [type: type, aggregate: aggregate]]
+
+  defp build_bin_field(field, false), do: field
+  defp build_bin_field([field | [opts]], true), do: [field, opts ++ [bin: true]]
 
   defp used_fields(attrs) do
     for attr <- [:x_field, :y_field, :color_field],
