@@ -116,7 +116,7 @@ input[type=number] {
 .inline-field {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
 }
 
 .root-field {
@@ -335,10 +335,12 @@ input::-webkit-inner-spin-button {
 }
 
 .field-settings {
-  background-color: var(--gray-100);
-  margin-top: -16px;
-  padding: 4px 8px;
+  background-color: var(--gray-50);
+  margin-top: -12px;
+  padding: 8px 6px;
   border-radius: 0.5rem;
+  margin-bottom: 4px;
+  border: 1px solid var(--gray-200);
 }
 
 /* Fix icon position - Safari 11+ */
