@@ -29,23 +29,9 @@ defmodule KinoVegaLite.ChartCell do
     }
 
     layers =
-      attrs["layers"] ||
-        [
-          %{
-            "chart_type" => "point",
-            "data_variable" => nil,
-            "x_field" => nil,
-            "y_field" => nil,
-            "color_field" => nil,
-            "x_field_type" => nil,
-            "y_field_type" => nil,
-            "color_field_type" => nil,
-            "x_field_aggregate" => nil,
-            "y_field_aggregate" => nil,
-            "color_field_aggregate" => nil,
-            "x_field_bin" => false
-          }
-        ]
+      if attrs["layers"],
+        do: Enum.map(attrs["layers"], &Map.merge(default_layer(), &1)),
+        else: [default_layer()]
 
     ctx =
       assign(ctx,
@@ -177,20 +163,15 @@ defmodule KinoVegaLite.ChartCell do
         _ -> {nil, nil}
       end
 
-    %{
-      "chart_type" => "point",
+    layer = %{
       "data_variable" => value,
       "x_field" => x_field.name,
       "y_field" => y_field.name,
-      "color_field" => nil,
       "x_field_type" => x_field.type,
-      "y_field_type" => y_field.type,
-      "color_field_type" => nil,
-      "x_field_aggregate" => nil,
-      "y_field_aggregate" => nil,
-      "color_field_aggregate" => nil,
-      "x_field_bin" => false
+      "y_field_type" => y_field.type
     }
+
+    Map.merge(default_layer(), layer)
   end
 
   defp updates_for_typed_fields(ctx, field, idx, value) do
@@ -315,14 +296,17 @@ defmodule KinoVegaLite.ChartCell do
         field: :x,
         name: encode(attrs.x_field),
         module: attrs.vl_alias,
-        args: build_arg_field(attrs.x_field, attrs.x_field_type, attrs.x_field_aggregate)
-        |> build_bin_field(attrs.x_field_bin)
+        args:
+          build_arg_field(attrs.x_field, attrs.x_field_type, attrs.x_field_aggregate)
+          |> build_bin_field(attrs.x_field_bin)
       },
       %{
         field: :y,
         name: encode(attrs.y_field),
         module: attrs.vl_alias,
-        args: build_arg_field(attrs.y_field, attrs.y_field_type, attrs.y_field_aggregate)
+        args:
+          build_arg_field(attrs.y_field, attrs.y_field_type, attrs.y_field_aggregate)
+          |> build_bin_field(attrs.y_field_bin)
       },
       %{
         field: :color,
@@ -330,6 +314,7 @@ defmodule KinoVegaLite.ChartCell do
         module: attrs.vl_alias,
         args:
           build_arg_field(attrs.color_field, attrs.color_field_type, attrs.color_field_aggregate)
+          |> build_bin_field(attrs.color_field_bin)
       }
     ]
 
@@ -472,4 +457,23 @@ defmodule KinoVegaLite.ChartCell do
 
   defp date?(value), do: match?({:ok, _}, Date.from_iso8601(value))
   defp date_time?(value), do: match?({:ok, _, _}, DateTime.from_iso8601(value))
+
+  defp default_layer() do
+    %{
+      "chart_type" => "point",
+      "data_variable" => nil,
+      "x_field" => nil,
+      "y_field" => nil,
+      "color_field" => nil,
+      "x_field_type" => nil,
+      "y_field_type" => nil,
+      "color_field_type" => nil,
+      "x_field_aggregate" => nil,
+      "y_field_aggregate" => nil,
+      "color_field_aggregate" => nil,
+      "x_field_bin" => false,
+      "y_field_bin" => false,
+      "color_field_bin" => false
+    }
+  end
 end
