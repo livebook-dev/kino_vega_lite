@@ -105,12 +105,7 @@ input[type=number] {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
-  flex-basis: 28%;
-}
-
-.field:first-child {
-  flex-basis: 41%;
-  margin-left: 4px;
+  flex-basis: 33%;
 }
 
 .inline-field {
@@ -302,7 +297,7 @@ input::-webkit-inner-spin-button {
 
 .input-icon-container {
   position: relative;
-  flex-basis: 41%;
+  flex-basis: 33%;
 }
 
 .icon-container {
