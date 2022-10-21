@@ -114,6 +114,12 @@ input[type=number] {
   align-items: center;
 }
 
+.field-with-settings {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+
 .root-field {
   display: flex;
   flex-direction: row;
@@ -279,6 +285,7 @@ input::-webkit-inner-spin-button {
 .add-layer {
   display: flex;
   justify-content: flex-end;
+  margin-top: 4px;
 }
 
 .hidden-checkbox-input {
@@ -331,7 +338,6 @@ input::-webkit-inner-spin-button {
 
 .field-settings {
   background-color: var(--gray-50);
-  margin-top: -12px;
   padding: 8px 6px;
   border-radius: 0.5rem;
   margin-bottom: 4px;
