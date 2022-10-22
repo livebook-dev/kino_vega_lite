@@ -336,8 +336,7 @@ input::-webkit-inner-spin-button {
   cursor: pointer;
 }
 
-.field-settings {
-  background-color: var(--gray-50);
+.field-settings-container {
   padding: 8px 6px;
   border-radius: 0.5rem;
   margin-bottom: 4px;
