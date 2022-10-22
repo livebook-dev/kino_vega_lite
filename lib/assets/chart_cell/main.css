@@ -105,7 +105,7 @@ input[type=number] {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
-  flex-basis: 33%;
+  flex-basis: 100%;
 }
 
 .inline-field {
@@ -131,6 +131,12 @@ input[type=number] {
   width: 80%;
   justify-content: start;
   flex-shrink: 3;
+}
+
+.no-grow-field {
+  flex-direction: column;
+  margin-bottom: 16px;
+  flex-basis: auto;
 }
 
 .button {
