@@ -403,6 +403,15 @@ input::-webkit-inner-spin-button {
   background-color: var(--blue-600);
 }
 
+.switch-button-checkbox:disabled {
+  background: white;
+  border-color: var(--blue-100);
+}
+
+.switch-button-checkbox:disabled + .switch-button-bg {
+  background-color: var(--blue-100);
+}
+
 /* Fix icon position - Safari 11+ */
 @media not all and (min-resolution: 0.001dpcm) {
   @supports (-webkit-appearance: none) and (stroke-color: transparent) {
