@@ -297,24 +297,36 @@ defmodule KinoVegaLite.ChartCell do
         name: encode(attrs.x_field),
         module: attrs.vl_alias,
         args:
-          build_arg_field(attrs.x_field, attrs.x_field_type, attrs.x_field_aggregate)
-          |> build_bin_field(attrs.x_field_bin)
+          build_arg_field(
+            attrs.x_field,
+            attrs.x_field_type,
+            attrs.x_field_aggregate,
+            attrs.x_field_bin
+          )
       },
       %{
         field: :y,
         name: encode(attrs.y_field),
         module: attrs.vl_alias,
         args:
-          build_arg_field(attrs.y_field, attrs.y_field_type, attrs.y_field_aggregate)
-          |> build_bin_field(attrs.y_field_bin)
+          build_arg_field(
+            attrs.y_field,
+            attrs.y_field_type,
+            attrs.y_field_aggregate,
+            attrs.y_field_bin
+          )
       },
       %{
         field: :color,
         name: encode(attrs.color_field),
         module: attrs.vl_alias,
         args:
-          build_arg_field(attrs.color_field, attrs.color_field_type, attrs.color_field_aggregate)
-          |> build_bin_field(attrs.color_field_bin)
+          build_arg_field(
+            attrs.color_field,
+            attrs.color_field_type,
+            attrs.color_field_aggregate,
+            attrs.color_field_bin
+          )
       }
     ]
 
@@ -367,16 +379,14 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_data(nil, _), do: nil
   defp build_arg_data(variable, fields), do: [Macro.var(variable, nil), [only: fields]]
 
-  defp build_arg_field(nil, _, _), do: nil
-  defp build_arg_field(@count_field, _, _), do: [[aggregate: :count]]
-  defp build_arg_field(field, nil, nil), do: [field]
-  defp build_arg_field(field, type, nil), do: [field, [type: type]]
-  defp build_arg_field(field, nil, aggregate), do: [field, [aggregate: aggregate]]
-  defp build_arg_field(field, type, aggregate), do: [field, [type: type, aggregate: aggregate]]
+  defp build_arg_field(nil, _, _, _), do: nil
+  defp build_arg_field(@count_field, _, _, _), do: [[aggregate: :count]]
 
-  defp build_bin_field(nil, _), do: nil
-  defp build_bin_field(field, false), do: field
-  defp build_bin_field([field | [opts]], true), do: [field, opts ++ [bin: true]]
+  defp build_arg_field(field, type, aggregate, bin) do
+    opts = [type: type, aggregate: aggregate, bin: bin]
+    args = for {_k, v} = opt <- opts, v, do: opt
+    if args == [], do: [field], else: [field, args]
+  end
 
   defp used_fields(attrs) do
     for attr <- [:x_field, :y_field, :color_field],
