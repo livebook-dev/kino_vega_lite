@@ -108,10 +108,19 @@ input[type=number] {
   flex-basis: 100%;
 }
 
-.inline-field {
+.inner-field {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+}
+
+.inner-field .input {
+  border: none;
+  background-color: transparent;
+  background-position: center right 5px;;
+  text-align: right;
+  padding-right: 23px;
 }
 
 .field-with-settings {
@@ -131,12 +140,6 @@ input[type=number] {
   width: 80%;
   justify-content: start;
   flex-shrink: 3;
-}
-
-.no-grow-field {
-  flex-direction: column;
-  margin-bottom: 16px;
-  flex-basis: auto;
 }
 
 .button {
