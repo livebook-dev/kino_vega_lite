@@ -14,7 +14,9 @@ defmodule KinoVegaLite.ChartCell do
     "color_field_type",
     "x_field_aggregate",
     "y_field_aggregate",
-    "color_field_aggregate"
+    "color_field_aggregate",
+    "x_field_scale_type",
+    "y_field_scale_type"
   ]
 
   @count_field "__count__"
@@ -303,6 +305,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.x_field_aggregate,
             attrs.x_field_bin
           )
+          |> build_scale_field(attrs.x_field_scale_type, :type)
       },
       %{
         field: :y,
@@ -315,6 +318,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.y_field_aggregate,
             attrs.y_field_bin
           )
+          |> build_scale_field(attrs.y_field_scale_type, :type)
       },
       %{
         field: :color,
@@ -327,6 +331,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.color_field_aggregate,
             attrs.color_field_bin
           )
+          |> build_scale_field(attrs.color_field_scale_scheme, :scheme)
       }
     ]
 
@@ -387,6 +392,18 @@ defmodule KinoVegaLite.ChartCell do
     args = for {_k, v} = opt <- opts, v, do: opt
     if args == [], do: [field], else: [field, args]
   end
+
+  defp build_scale_field(nil, _, _), do: nil
+  defp build_scale_field(field, nil, _), do: field
+  defp build_scale_field([field], scale, :type), do: [field, [scale: [type: scale]]]
+
+  defp build_scale_field([field | [opts]], scale, :type),
+    do: [field, opts ++ [scale: [type: scale]]]
+
+  defp build_scale_field([field], scale, :scheme), do: [field, [scale: [scheme: scale]]]
+
+  defp build_scale_field([field | [opts]], scale, :scheme),
+    do: [field, opts ++ [scale: [scheme: scale]]]
 
   defp used_fields(attrs) do
     for attr <- [:x_field, :y_field, :color_field],
@@ -484,7 +501,10 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_aggregate" => nil,
       "x_field_bin" => false,
       "y_field_bin" => false,
-      "color_field_bin" => false
+      "color_field_bin" => false,
+      "x_field_scale_type" => nil,
+      "y_field_scale_type" => nil,
+      "color_field_scale_scheme" => nil
     }
   end
 end
