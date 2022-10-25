@@ -25,7 +25,10 @@ defmodule KinoVegaLite.ChartCellTest do
     "color_field_type" => nil,
     "x_field_aggregate" => nil,
     "y_field_aggregate" => nil,
-    "color_field_aggregate" => nil
+    "color_field_aggregate" => nil,
+    "x_field_bin" => false,
+    "y_field_bin" => false,
+    "color_field_bin" => false
   }
 
   test "returns no source when starting fresh with no data" do
@@ -203,6 +206,18 @@ defmodule KinoVegaLite.ChartCellTest do
              |> VegaLite.data_from_values(data, only: ["a"])
              |> VegaLite.mark(:bar)
              |> VegaLite.encode_field(:x, "a")
+             |> VegaLite.encode(:y, aggregate: :count)\
+             """
+    end
+
+    test "simple plot with bin count and binned x" do
+      attrs = build_attrs(%{"x_field_bin" => true, "y_field" => "__count__"})
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.data_from_values(data, only: ["a"])
+             |> VegaLite.mark(:bar)
+             |> VegaLite.encode_field(:x, "a", bin: true)
              |> VegaLite.encode(:y, aggregate: :count)\
              """
     end

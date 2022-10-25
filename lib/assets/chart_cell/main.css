@@ -14,6 +14,9 @@
   --gray-800: #1c2a3a;
 
   --blue-100: #ecf0ff;
+  --blue-600: #3e64ff;
+
+  --red-300: #f1a3a6;
 }
 
 .container {
@@ -73,6 +76,15 @@ input[type=number] {
   font-weight: 500;
 }
 
+.inline-input-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--gray-800);
+  font-weight: 500;
+  padding-right: 6px;
+  font-size: 0.875rem;
+}
+
 .input--xs {
   width: 30%;
 }
@@ -93,12 +105,28 @@ input[type=number] {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
-  flex-basis: 28%;
+  flex-basis: 100%;
 }
 
-.field:first-child {
-  flex-basis: 41%;
-  margin-left: 4px;
+.inner-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inner-field .input {
+  border: none;
+  background-color: transparent;
+  background-position: center right 5px;;
+  text-align: right;
+  padding-right: 23px;
+}
+
+.field-with-settings {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
 }
 
 .root-field {
@@ -266,4 +294,139 @@ input::-webkit-inner-spin-button {
 .add-layer {
   display: flex;
   justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.hidden-checkbox-input {
+  display: none;
+}
+
+.input-icon {
+  border: 1px solid var(--gray-200);
+  outline: none;
+  padding: 8px 12px 8px 42px;
+}
+
+.input-icon:hover {
+  cursor: pointer;
+}
+
+.input-icon-container {
+  position: relative;
+  flex-basis: 33%;
+}
+
+.icon-container {
+  position: absolute;
+  top: 20px;
+  padding: 5px 6px;
+  border-right: 1px solid var(--gray-200);
+  width: 22px;
+  height: 23px;
+  background-color: var(--gray-200);
+  border-radius: 0.5rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  margin-left: 1px;
+}
+
+.icon-container:hover {
+  cursor: pointer;
+  background-color: var(--gray-300);
+}
+
+.input-icon-text {
+  border: 1px solid var(--gray-200);
+  outline: none;
+  padding: 8px 12px 8px 42px;
+}
+
+.hidden-checkbox:hover {
+  cursor: pointer;
+}
+
+.field-settings-container {
+  padding: 8px 6px;
+  border-radius: 0.5rem;
+  margin-bottom: 4px;
+  border: 1px solid var(--gray-200);
+}
+
+/* Switch */
+
+.switch-button {
+  display: inline-block;
+  position: relative;
+  width: 56px;
+  height: 28px;
+  user-select: none;
+}
+
+.switch-button[disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.switch-button-checkbox {
+  outline: none;
+  appearance: none;
+  position: absolute;
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  border-radius: 9999px;
+  background-color: white;
+  border: 5px solid var(--gray-200);
+  cursor: pointer;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.switch-button-bg {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background-color: var(--gray-200);
+  cursor: pointer;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.switch-button-checkbox:checked {
+  background: white;
+  border-color: var(--blue-600);
+  transform: translateX(100%);
+}
+
+.switch-button-checkbox:checked + .switch-button-bg {
+  background-color: var(--blue-600);
+}
+
+.switch-button-checkbox:disabled {
+  background: white;
+  border-color: var(--blue-100);
+}
+
+.switch-button-checkbox:disabled + .switch-button-bg {
+  background-color: var(--blue-100);
+}
+
+/* Fix icon position - Safari 11+ */
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) and (stroke-color: transparent) {
+    .icon-container {
+      top: 22px;
+    }
+  }
+}
+
+/* Fix icon border - Firefox */
+@-moz-document url-prefix() {
+  .icon-container {
+    height: 24px;
+  }
 }
