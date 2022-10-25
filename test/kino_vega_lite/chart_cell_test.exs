@@ -210,7 +210,7 @@ defmodule KinoVegaLite.ChartCellTest do
              """
     end
 
-    test "simple plot with bin count and binned x" do
+    test "simple plot with bin" do
       attrs = build_attrs(%{"x_field_bin" => true, "y_field" => "__count__"})
 
       assert ChartCell.to_source(attrs) == """
