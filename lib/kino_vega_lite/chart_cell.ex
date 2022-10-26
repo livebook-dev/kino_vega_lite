@@ -305,7 +305,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.x_field_aggregate,
             attrs.x_field_bin
           )
-          |> build_scale_field(attrs.x_field_scale_type, :type)
+          |> build_scale_field(attrs.x_field_scale_type)
       },
       %{
         field: :y,
@@ -318,7 +318,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.y_field_aggregate,
             attrs.y_field_bin
           )
-          |> build_scale_field(attrs.y_field_scale_type, :type)
+          |> build_scale_field(attrs.y_field_scale_type)
       },
       %{
         field: :color,
@@ -331,7 +331,7 @@ defmodule KinoVegaLite.ChartCell do
             attrs.color_field_aggregate,
             attrs.color_field_bin
           )
-          |> build_scale_field(attrs.color_field_scale_scheme, :scheme)
+          |> build_scale_scheme_field(attrs.color_field_scale_scheme)
       }
     ]
 
@@ -393,16 +393,16 @@ defmodule KinoVegaLite.ChartCell do
     if args == [], do: [field], else: [field, args]
   end
 
-  defp build_scale_field(nil, _, _), do: nil
-  defp build_scale_field(field, nil, _), do: field
-  defp build_scale_field([field], scale, :type), do: [field, [scale: [type: scale]]]
+  defp build_scale_field(nil, _), do: nil
+  defp build_scale_field(field, nil), do: field
+  defp build_scale_field([field], scale), do: [field, [scale: [type: scale]]]
+  defp build_scale_field([field | [opts]], scale), do: [field, opts ++ [scale: [type: scale]]]
 
-  defp build_scale_field([field | [opts]], scale, :type),
-    do: [field, opts ++ [scale: [type: scale]]]
+  defp build_scale_scheme_field(nil, _), do: nil
+  defp build_scale_scheme_field(field, nil), do: field
+  defp build_scale_scheme_field([field], scale), do: [field, [scale: [scheme: scale]]]
 
-  defp build_scale_field([field], scale, :scheme), do: [field, [scale: [scheme: scale]]]
-
-  defp build_scale_field([field | [opts]], scale, :scheme),
+  defp build_scale_scheme_field([field | [opts]], scale),
     do: [field, opts ++ [scale: [scheme: scale]]]
 
   defp used_fields(attrs) do
