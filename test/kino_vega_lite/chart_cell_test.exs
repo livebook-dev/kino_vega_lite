@@ -28,7 +28,10 @@ defmodule KinoVegaLite.ChartCellTest do
     "color_field_aggregate" => nil,
     "x_field_bin" => false,
     "y_field_bin" => false,
-    "color_field_bin" => false
+    "color_field_bin" => false,
+    "x_field_scale_type" => nil,
+    "y_field_scale_type" => nil,
+    "color_field_scale_scheme" => nil
   }
 
   test "returns no source when starting fresh with no data" do
@@ -219,6 +222,43 @@ defmodule KinoVegaLite.ChartCellTest do
              |> VegaLite.mark(:bar)
              |> VegaLite.encode_field(:x, "a", bin: true)
              |> VegaLite.encode(:y, aggregate: :count)\
+             """
+    end
+  end
+
+  describe "code generation for scales" do
+    test "plot with linear scale for x" do
+      attrs =
+        build_attrs(%{
+          "x_field_type" => "quantitative",
+          "x_field_scale_type" => "log",
+          "y_field" => "__count__"
+        })
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.data_from_values(data, only: ["a"])
+             |> VegaLite.mark(:bar)
+             |> VegaLite.encode_field(:x, "a", type: :quantitative, scale: [type: :log])
+             |> VegaLite.encode(:y, aggregate: :count)\
+             """
+    end
+
+    test "plot with color scheme" do
+      attrs =
+        build_attrs(%{
+          "y_field" => "__count__",
+          "color_field" => "c",
+          "color_field_scale_scheme" => "accent"
+        })
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.data_from_values(data, only: ["a", "c"])
+             |> VegaLite.mark(:bar)
+             |> VegaLite.encode_field(:x, "a")
+             |> VegaLite.encode(:y, aggregate: :count)
+             |> VegaLite.encode_field(:color, "c", scale: [scheme: "accent"])\
              """
     end
   end
