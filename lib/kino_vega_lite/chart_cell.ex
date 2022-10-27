@@ -299,45 +299,36 @@ defmodule KinoVegaLite.ChartCell do
         name: encode(attrs.x_field),
         module: attrs.vl_alias,
         args:
-          if attrs.x_field do
-            build_arg_field(
-              attrs.x_field,
-              attrs.x_field_type,
-              attrs.x_field_aggregate,
-              attrs.x_field_bin
-            )
-            |> build_scale_type_field(attrs.x_field_scale_type)
-          end
+          build_arg_field(attrs.x_field,
+            type: attrs.x_field_type,
+            aggregate: attrs.x_field_aggregate,
+            bin: attrs.x_field_bin,
+            scale: if(type = attrs.x_field_scale_type, do: [type: type])
+          )
       },
       %{
         field: :y,
         name: encode(attrs.y_field),
         module: attrs.vl_alias,
         args:
-          if attrs.y_field do
-            build_arg_field(
-              attrs.y_field,
-              attrs.y_field_type,
-              attrs.y_field_aggregate,
-              attrs.y_field_bin
-            )
-            |> build_scale_type_field(attrs.y_field_scale_type)
-          end
+          build_arg_field(attrs.y_field,
+            type: attrs.y_field_type,
+            aggregate: attrs.y_field_aggregate,
+            bin: attrs.y_field_bin,
+            scale: if(type = attrs.y_field_scale_type, do: [type: type])
+          )
       },
       %{
         field: :color,
         name: encode(attrs.color_field),
         module: attrs.vl_alias,
         args:
-          if attrs.color_field do
-            build_arg_field(
-              attrs.color_field,
-              attrs.color_field_type,
-              attrs.color_field_aggregate,
-              attrs.color_field_bin
-            )
-            |> build_scale_scheme_field(attrs.color_field_scale_scheme)
-          end
+          build_arg_field(attrs.color_field,
+            type: attrs.color_field_type,
+            aggregate: attrs.color_field_aggregate,
+            bin: attrs.color_field_bin,
+            scale: if(scheme = attrs.color_field_scale_scheme, do: [scheme: scheme])
+          )
       }
     ]
 
@@ -390,30 +381,12 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_data(nil, _), do: nil
   defp build_arg_data(variable, fields), do: [Macro.var(variable, nil), [only: fields]]
 
-  defp build_arg_field(@count_field, _, _, _), do: [[aggregate: :count]]
+  defp build_arg_field(nil, _), do: nil
+  defp build_arg_field(@count_field, _), do: [[aggregate: :count]]
 
-  defp build_arg_field(field, type, aggregate, bin) do
-    opts = [type: type, aggregate: aggregate, bin: bin]
+  defp build_arg_field(field, opts) do
     args = for {_k, v} = opt <- opts, v, do: opt
     if args == [], do: [field], else: [field, args]
-  end
-
-  defp build_scale_type_field(field, nil), do: field
-
-  defp build_scale_type_field(field, scale) do
-    case field do
-      [field | [opts]] -> [field, opts ++ [scale: [type: scale]]]
-      [field] -> [field, [scale: [type: scale]]]
-    end
-  end
-
-  defp build_scale_scheme_field(field, nil), do: field
-
-  defp build_scale_scheme_field(field, scale) do
-    case field do
-      [field | [opts]] -> [field, opts ++ [scale: [scheme: scale]]]
-      [field] -> [field, [scale: [scheme: scale]]]
-    end
   end
 
   defp used_fields(attrs) do
