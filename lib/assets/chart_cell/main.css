@@ -118,9 +118,10 @@ input[type=number] {
 .inner-field .input {
   border: none;
   background-color: transparent;
-  background-position: center right 5px;;
+  background-position: center right 0px;
+  cursor: pointer;
   text-align: right;
-  padding-right: 23px;
+  padding-right: 14px;
 }
 
 .field-with-settings {
@@ -346,7 +347,7 @@ input::-webkit-inner-spin-button {
 }
 
 .field-settings-container {
-  padding: 8px 6px;
+  padding: 6px 9px;
   border-radius: 0.5rem;
   margin-bottom: 4px;
   border: 1px solid var(--gray-200);
