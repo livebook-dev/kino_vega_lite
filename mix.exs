@@ -1,7 +1,7 @@
 defmodule KinoVegaLite.MixProject do
   use Mix.Project
 
-  @version "0.1.6"
+  @version "0.1.7"
   @description "Vega-Lite integration with Livebook"
 
   def project do
@@ -26,7 +26,7 @@ defmodule KinoVegaLite.MixProject do
 
   defp deps do
     [
-      {:kino, "~> 0.6.1 or ~> 0.7.0"},
+      {:kino, "~> 0.7"},
       {:table, "~> 0.1.0"},
       {:vega_lite, "~> 0.1.4"},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}
