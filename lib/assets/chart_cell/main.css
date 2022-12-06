@@ -60,7 +60,7 @@ pre {
   color: var(--gray-600);
 }
 
-input[type=number] {
+input[type="number"] {
   appearance: textfield;
 }
 
