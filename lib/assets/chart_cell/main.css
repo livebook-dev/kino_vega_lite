@@ -114,7 +114,11 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
-  flex-basis: 100%;
+  flex-basis: 33%;
+}
+
+.field--xl { 
+  flex-basis: 66%;
 }
 
 .inner-field {
