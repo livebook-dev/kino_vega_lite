@@ -16,7 +16,9 @@ defmodule KinoVegaLite.ChartCell do
     "y_field_aggregate",
     "color_field_aggregate",
     "x_field_scale_type",
-    "y_field_scale_type"
+    "y_field_scale_type",
+    "geodata_type",
+    "projection_type"
   ]
 
   @count_field "__count__"
@@ -74,14 +76,8 @@ defmodule KinoVegaLite.ChartCell do
   @impl true
   def handle_info({:scan_binding_result, data_options, vl_alias}, ctx) do
     ctx = assign(ctx, data_options: data_options, vl_alias: vl_alias)
-
     first_layer = List.first(ctx.assigns.layers)
-
-    updated_layer =
-      case {first_layer["data_variable"], data_options} do
-        {nil, [%{variable: data_variable} | _]} -> updates_for_data_variable(ctx, data_variable)
-        _ -> %{}
-      end
+    updated_layer = updates_for_layer(first_layer, data_options, ctx)
 
     ctx =
       if updated_layer == %{},
@@ -147,12 +143,30 @@ defmodule KinoVegaLite.ChartCell do
     {:noreply, ctx}
   end
 
+  def handle_event("add_geo_layer", _, ctx) do
+    geo_layer = default_geo_layer()
+    updated_layers = ctx.assigns.layers ++ [geo_layer]
+    ctx = assign(ctx, layers: updated_layers)
+    broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
+
+    {:noreply, ctx}
+  end
+
   def handle_event("remove_layer", %{"layer" => idx}, ctx) do
     updated_layers = List.delete_at(ctx.assigns.layers, idx)
     ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
+  end
+
+  defp updates_for_layer(%{"chart_type" => "geoshape"}, _, _), do: %{}
+
+  defp updates_for_layer(first_layer, data_options, ctx) do
+    case {first_layer["data_variable"], data_options} do
+      {nil, [%{variable: data_variable} | _]} -> updates_for_data_variable(ctx, data_variable)
+      _ -> %{}
+    end
   end
 
   defp updates_for_data_variable(ctx, value) do
@@ -237,6 +251,11 @@ defmodule KinoVegaLite.ChartCell do
     |> Kino.SmartCell.quoted_to_string()
   end
 
+  defp to_quoted(%{"geodata_url" => nil}) do
+    quote do
+    end
+  end
+
   defp to_quoted(%{"x_field" => nil, "y_field" => nil}) do
     quote do
     end
@@ -275,6 +294,35 @@ defmodule KinoVegaLite.ChartCell do
 
     layers = for layer <- layers, do: to_quoted(Map.merge(layer_root, layer))
     apply_layers(root, layers, attrs.vl_alias)
+  end
+
+  defp to_quoted(%{"chart_type" => "geoshape"} = attrs) do
+    attrs = Map.new(attrs, fn {k, v} -> convert_field(k, v) end)
+
+    [root | nodes] = [
+      %{
+        field: nil,
+        name: :new,
+        module: attrs.vl_alias,
+        args: build_arg_root(width: attrs.width, height: attrs.height, title: attrs.chart_title)
+      },
+      %{
+        field: :geodata,
+        name: :data_from_url,
+        module: attrs.vl_alias,
+        args: build_arg_geodata(attrs.geodata_url, attrs.geodata_type, attrs.geodata_feature)
+      },
+      %{
+        field: :projection,
+        name: :projection,
+        module: attrs.vl_alias,
+        args: build_arg_projection(type: attrs.projection_type, center: attrs.projection_center)
+      },
+      %{field: :mark, name: :mark, module: attrs.vl_alias, args: [attrs.chart_type]}
+    ]
+
+    root = build_root(root)
+    Enum.reduce(nodes, root, &apply_node/2)
   end
 
   defp to_quoted(attrs) do
@@ -381,12 +429,21 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_data(nil, _), do: nil
   defp build_arg_data(variable, fields), do: [Macro.var(variable, nil), [only: fields]]
 
+  defp build_arg_geodata(url, type, feature) do
+    [url, [format: [type: type, feature: feature]]]
+  end
+
   defp build_arg_field(nil, _), do: nil
   defp build_arg_field(@count_field, _), do: [[aggregate: :count]]
 
   defp build_arg_field(field, opts) do
     args = for {_k, v} = opt <- opts, v, do: opt
     if args == [], do: [field], else: [field, args]
+  end
+
+  defp build_arg_projection(opts) do
+    args = for {_k, v} = opt <- opts, v, do: opt
+    if args != [], do: [args]
   end
 
   defp used_fields(attrs) do
@@ -489,6 +546,18 @@ defmodule KinoVegaLite.ChartCell do
       "x_field_scale_type" => nil,
       "y_field_scale_type" => nil,
       "color_field_scale_scheme" => nil
+    }
+  end
+
+  defp default_geo_layer() do
+    %{
+      "geodata_url" => nil,
+      "projection_center" => nil,
+      "geodata_type" => "geojson",
+      "projection_type" => "mercator",
+      "geodata_feature" => nil,
+      "chart_type" => "geoshape",
+      "data_variable" => nil
     }
   end
 end
