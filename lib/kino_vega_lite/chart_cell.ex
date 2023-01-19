@@ -144,8 +144,9 @@ defmodule KinoVegaLite.ChartCell do
   end
 
   def handle_event("add_geo_layer", _, ctx) do
-    geo_layer = default_geo_layer()
-    updated_layers = ctx.assigns.layers ++ [geo_layer]
+    data_variable = List.first(ctx.assigns.layers)["data_variable"]
+    geo_layer = default_geo_layer(data_variable)
+    updated_layers = [geo_layer | ctx.assigns.layers]
     ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
@@ -549,7 +550,7 @@ defmodule KinoVegaLite.ChartCell do
     }
   end
 
-  defp default_geo_layer() do
+  defp default_geo_layer(data_variable) do
     %{
       "geodata_url" => nil,
       "projection_center" => nil,
@@ -557,7 +558,7 @@ defmodule KinoVegaLite.ChartCell do
       "projection_type" => "mercator",
       "geodata_feature" => nil,
       "chart_type" => "geoshape",
-      "data_variable" => nil
+      "data_variable" => data_variable
     }
   end
 end
