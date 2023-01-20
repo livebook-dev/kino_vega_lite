@@ -17,6 +17,7 @@ defmodule KinoVegaLite.ChartCellTest do
   @layer %{
     "chart_type" => "bar",
     "data_variable" => "data",
+    "geodata" => false,
     "x_field" => "a",
     "y_field" => "b",
     "color_field" => nil,
@@ -31,7 +32,9 @@ defmodule KinoVegaLite.ChartCellTest do
     "color_field_bin" => false,
     "x_field_scale_type" => nil,
     "y_field_scale_type" => nil,
-    "color_field_scale_scheme" => nil
+    "color_field_scale_scheme" => nil,
+    "latitude_field" => nil,
+    "longitude_field" => nil
   }
 
   test "returns no source when starting fresh with no data" do

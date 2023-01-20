@@ -34,7 +34,7 @@ defmodule KinoVegaLite.ChartCell do
 
     layers =
       if attrs["layers"],
-        do: Enum.map(attrs["layers"], &Map.merge(default_layer(), &1)),
+        do: Enum.map(attrs["layers"], &normalize_layer(&1)),
         else: [default_layer()]
 
     ctx =
@@ -218,6 +218,18 @@ defmodule KinoVegaLite.ChartCell do
 
   defp convert_field(field, nil), do: {String.to_atom(field), nil}
 
+  defp convert_field("projection_center", center) do
+    Regex.named_captures(~r/(?<lng>-?\d+\.?\d*),\s*(?<lat>-?\d+\.?\d*)/, center)
+    |> case do
+      %{"lat" => lat, "lng" => lng} ->
+        {{lng, _}, {lat, _}} = {Float.parse(lng), Float.parse(lat)}
+        {:projection_center, validate_coords({lng, lat})}
+
+      _ ->
+        nil
+    end
+  end
+
   defp convert_field(field, value) when field in @as_atom do
     {String.to_atom(field), String.to_atom(value)}
   end
@@ -257,7 +269,12 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
-  defp to_quoted(%{"x_field" => nil, "y_field" => nil}) do
+  defp to_quoted(%{"geodata" => true, "latitude" => nil, "longitude" => nil}) do
+    quote do
+    end
+  end
+
+  defp to_quoted(%{"geodata" => false, "x_field" => nil, "y_field" => nil}) do
     quote do
     end
   end
@@ -319,7 +336,47 @@ defmodule KinoVegaLite.ChartCell do
         module: attrs.vl_alias,
         args: build_arg_projection(type: attrs.projection_type, center: attrs.projection_center)
       },
-      %{field: :mark, name: :mark, module: attrs.vl_alias, args: [attrs.chart_type]}
+      %{
+        field: :mark,
+        name: :mark,
+        module: attrs.vl_alias,
+        args: [attrs.chart_type, [fill: "lightgray", stroke: "white"]]
+      }
+    ]
+
+    root = build_root(root)
+    Enum.reduce(nodes, root, &apply_node/2)
+  end
+
+  defp to_quoted(%{"geodata" => true} = attrs) do
+    attrs = Map.new(attrs, fn {k, v} -> convert_field(k, v) end)
+
+    [root | nodes] = [
+      %{
+        field: nil,
+        name: :new,
+        module: attrs.vl_alias,
+        args: build_arg_root(width: attrs.width, height: attrs.height, title: attrs.chart_title)
+      },
+      %{
+        field: :data,
+        name: :data_from_values,
+        module: attrs.vl_alias,
+        args: build_arg_data(attrs.data_variable, [attrs.latitude_field, attrs.longitude_field])
+      },
+      %{field: :mark, name: :mark, module: attrs.vl_alias, args: [attrs.chart_type]},
+      %{
+        field: :latitude,
+        name: encode(attrs.latitude_field),
+        module: attrs.vl_alias,
+        args: build_arg_field(attrs.latitude_field, [])
+      },
+      %{
+        field: :longitude,
+        name: encode(attrs.longitude_field),
+        module: attrs.vl_alias,
+        args: build_arg_field(attrs.longitude_field, [])
+      }
     ]
 
     root = build_root(root)
@@ -430,6 +487,10 @@ defmodule KinoVegaLite.ChartCell do
   defp build_arg_data(nil, _), do: nil
   defp build_arg_data(variable, fields), do: [Macro.var(variable, nil), [only: fields]]
 
+  defp build_arg_geodata(url, type, nil) do
+    [url, [format: [type: type]]]
+  end
+
   defp build_arg_geodata(url, type, feature) do
     [url, [format: [type: type, feature: feature]]]
   end
@@ -532,6 +593,7 @@ defmodule KinoVegaLite.ChartCell do
     %{
       "chart_type" => "point",
       "data_variable" => nil,
+      "geodata" => false,
       "x_field" => nil,
       "y_field" => nil,
       "color_field" => nil,
@@ -546,7 +608,9 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_bin" => false,
       "x_field_scale_type" => nil,
       "y_field_scale_type" => nil,
-      "color_field_scale_scheme" => nil
+      "color_field_scale_scheme" => nil,
+      "latitude_field" => nil,
+      "longitude_field" => nil
     }
   end
 
@@ -561,4 +625,13 @@ defmodule KinoVegaLite.ChartCell do
       "data_variable" => data_variable
     }
   end
+
+  defp validate_coords({lng, lat}) do
+    valid_lng? = lng >= -180 and lng <= 180
+    valid_lat? = lat >= -90 and lat <= 90
+    if valid_lng? and valid_lat?, do: [lng, lat]
+  end
+
+  defp normalize_layer(%{"chart_type" => "geoshape"} = layer), do: layer
+  defp normalize_layer(layer), do: Map.merge(default_layer(), layer)
 end
