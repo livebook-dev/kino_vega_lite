@@ -23,6 +23,7 @@ defmodule KinoVegaLite.ChartCell do
 
   @count_field "__count__"
   @typed_fields ["x_field", "y_field", "color_field"]
+  @geodata_marks ["point (geodata)", "circle (geodata)", "square (geodata)"]
 
   @impl true
   def init(attrs, ctx) do
@@ -230,6 +231,11 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
+  defp convert_field("chart_type", value) when value in @geodata_marks do
+    value = String.split(value) |> hd() |> String.to_atom()
+    {:chart_type, value}
+  end
+
   defp convert_field(field, value) when field in @as_atom do
     {String.to_atom(field), String.to_atom(value)}
   end
@@ -269,12 +275,14 @@ defmodule KinoVegaLite.ChartCell do
     end
   end
 
-  defp to_quoted(%{"geodata" => true, "latitude" => nil, "longitude" => nil}) do
+  defp to_quoted(%{"chart_type" => mark, "latitude" => nil, "longitude" => nil})
+       when mark in @geodata_marks do
     quote do
     end
   end
 
-  defp to_quoted(%{"geodata" => false, "x_field" => nil, "y_field" => nil}) do
+  defp to_quoted(%{"chart_type" => mark, "x_field" => nil, "y_field" => nil})
+       when mark not in @geodata_marks do
     quote do
     end
   end
@@ -348,7 +356,7 @@ defmodule KinoVegaLite.ChartCell do
     Enum.reduce(nodes, root, &apply_node/2)
   end
 
-  defp to_quoted(%{"geodata" => true} = attrs) do
+  defp to_quoted(%{"chart_type" => mark} = attrs) when mark in @geodata_marks do
     attrs = Map.new(attrs, fn {k, v} -> convert_field(k, v) end)
 
     [root | nodes] = [
@@ -598,7 +606,6 @@ defmodule KinoVegaLite.ChartCell do
     %{
       "chart_type" => "point",
       "data_variable" => nil,
-      "geodata" => false,
       "x_field" => nil,
       "y_field" => nil,
       "color_field" => nil,

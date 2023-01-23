@@ -17,7 +17,6 @@ defmodule KinoVegaLite.ChartCellTest do
   @layer %{
     "chart_type" => "bar",
     "data_variable" => "data",
-    "geodata" => false,
     "x_field" => "a",
     "y_field" => "b",
     "color_field" => nil,
@@ -349,10 +348,9 @@ defmodule KinoVegaLite.ChartCellTest do
       }
 
       layer = %{
-        "geodata" => true,
         "latitude_field" => "latitude",
         "longitude_field" => "longitude",
-        "chart_type" => "point"
+        "chart_type" => "point (geodata)"
       }
 
       attrs = build_geo_layer_attrs([geo_layer, layer])
