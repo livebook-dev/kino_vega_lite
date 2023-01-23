@@ -34,7 +34,18 @@ defmodule KinoVegaLite.ChartCellTest do
     "y_field_scale_type" => nil,
     "color_field_scale_scheme" => nil,
     "latitude_field" => nil,
-    "longitude_field" => nil
+    "longitude_field" => nil,
+    "geodata_color" => "blue"
+  }
+
+  @geo_layer %{
+    "geodata_url" => nil,
+    "projection_center" => nil,
+    "geodata_type" => "geojson",
+    "projection_type" => "mercator",
+    "geodata_feature" => nil,
+    "chart_type" => "geoshape",
+    "data_variable" => nil
   }
 
   test "returns no source when starting fresh with no data" do
@@ -328,6 +339,44 @@ defmodule KinoVegaLite.ChartCellTest do
     end
   end
 
+  describe "code generation for geodata" do
+    test "geodata from url" do
+      geo_layer = %{
+        "geodata_url" =>
+          "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/germany/germany-regions.json",
+        "geodata_feature" => "DEU_adm2",
+        "geodata_type" => "topojson"
+      }
+
+      layer = %{
+        "geodata" => true,
+        "latitude_field" => "latitude",
+        "longitude_field" => "longitude",
+        "chart_type" => "point"
+      }
+
+      attrs = build_geo_layer_attrs([geo_layer, layer])
+
+      assert ChartCell.to_source(attrs) == """
+             VegaLite.new()
+             |> VegaLite.layers([
+               VegaLite.new()
+               |> VegaLite.data_from_url(
+                 "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/germany/germany-regions.json",
+                 format: [type: :topojson, feature: "DEU_adm2"]
+               )
+               |> VegaLite.projection(type: :mercator)
+               |> VegaLite.mark(:geoshape, fill: "lightgray", stroke: "white"),
+               VegaLite.new()
+               |> VegaLite.data_from_values(data, only: ["latitude", "longitude"])
+               |> VegaLite.mark(:point, color: "blue")
+               |> VegaLite.encode_field(:latitude, "latitude")
+               |> VegaLite.encode_field(:longitude, "longitude")
+             ])\
+             """
+    end
+  end
+
   defp build_attrs(root_attrs \\ %{}, layer_attrs) do
     root_attrs = Map.merge(@root, root_attrs)
     layer_attrs = Map.merge(@layer, layer_attrs)
@@ -338,5 +387,12 @@ defmodule KinoVegaLite.ChartCellTest do
     root_attrs = Map.merge(@root, root_attrs)
     layer_attrs = Map.merge(@layer, layer_attrs)
     Map.put(root_attrs, "layers", [@layer, layer_attrs])
+  end
+
+  defp build_geo_layer_attrs(root_attrs \\ %{}, [geo_layer_attrs, layer_attrs]) do
+    root_attrs = Map.merge(@root, root_attrs)
+    geo_layer_attrs = Map.merge(@geo_layer, geo_layer_attrs)
+    layer_attrs = Map.merge(@layer, layer_attrs)
+    Map.put(root_attrs, "layers", [geo_layer_attrs, layer_attrs])
   end
 end
