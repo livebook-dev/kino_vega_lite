@@ -364,7 +364,12 @@ defmodule KinoVegaLite.ChartCell do
         module: attrs.vl_alias,
         args: build_arg_data(attrs.data_variable, [attrs.latitude_field, attrs.longitude_field])
       },
-      %{field: :mark, name: :mark, module: attrs.vl_alias, args: [attrs.chart_type]},
+      %{
+        field: :mark,
+        name: :mark,
+        module: attrs.vl_alias,
+        args: [attrs.chart_type, [color: attrs.geodata_color]]
+      },
       %{
         field: :latitude,
         name: encode(attrs.latitude_field),
@@ -610,7 +615,8 @@ defmodule KinoVegaLite.ChartCell do
       "y_field_scale_type" => nil,
       "color_field_scale_scheme" => nil,
       "latitude_field" => nil,
-      "longitude_field" => nil
+      "longitude_field" => nil,
+      "geodata_color" => "blue"
     }
   end
 
