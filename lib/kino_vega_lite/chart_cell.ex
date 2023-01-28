@@ -421,7 +421,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.x_field,
             type: attrs.x_field_type,
             aggregate: attrs.x_field_aggregate,
-            bin: if(attrs.x_field_bin, do: [maxbins: attrs.x_field_bin]),
+            bin: if(is_integer(attrs.x_field_bin), do: [maxbins: attrs.x_field_bin]),
             scale: if(type = attrs.x_field_scale_type, do: [type: type])
           )
       },
@@ -433,7 +433,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.y_field,
             type: attrs.y_field_type,
             aggregate: attrs.y_field_aggregate,
-            bin: if(attrs.y_field_bin, do: [maxbins: attrs.y_field_bin]),
+            bin: if(is_integer(attrs.y_field_bin), do: [maxbins: attrs.y_field_bin]),
             scale: if(type = attrs.y_field_scale_type, do: [type: type])
           )
       },
@@ -445,7 +445,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.color_field,
             type: attrs.color_field_type,
             aggregate: attrs.color_field_aggregate,
-            bin: if(attrs.color_field_bin, do: [maxbins: attrs.color_field_bin]),
+            bin: if(is_integer(attrs.color_field_bin), do: [maxbins: attrs.color_field_bin]),
             scale: if(scheme = attrs.color_field_scale_scheme, do: [scheme: scheme])
           )
       }
