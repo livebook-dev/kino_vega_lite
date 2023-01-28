@@ -5,7 +5,7 @@ defmodule KinoVegaLite.ChartCell do
   use Kino.JS.Live
   use Kino.SmartCell, name: "Chart"
 
-  @as_int ["width", "height"]
+  @as_int ["width", "height", "x_field_bin", "y_field_bin", "color_field_bin"]
   @as_atom [
     "data_variable",
     "chart_type",
@@ -421,7 +421,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.x_field,
             type: attrs.x_field_type,
             aggregate: attrs.x_field_aggregate,
-            bin: attrs.x_field_bin,
+            bin: if(attrs.x_field_bin, do: [maxbins: attrs.x_field_bin]),
             scale: if(type = attrs.x_field_scale_type, do: [type: type])
           )
       },
@@ -433,7 +433,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.y_field,
             type: attrs.y_field_type,
             aggregate: attrs.y_field_aggregate,
-            bin: attrs.y_field_bin,
+            bin: if(attrs.y_field_bin, do: [maxbins: attrs.y_field_bin]),
             scale: if(type = attrs.y_field_scale_type, do: [type: type])
           )
       },
@@ -445,7 +445,7 @@ defmodule KinoVegaLite.ChartCell do
           build_arg_field(attrs.color_field,
             type: attrs.color_field_type,
             aggregate: attrs.color_field_aggregate,
-            bin: attrs.color_field_bin,
+            bin: if(attrs.color_field_bin, do: [maxbins: attrs.color_field_bin]),
             scale: if(scheme = attrs.color_field_scale_scheme, do: [scheme: scheme])
           )
       }
@@ -615,9 +615,9 @@ defmodule KinoVegaLite.ChartCell do
       "x_field_aggregate" => nil,
       "y_field_aggregate" => nil,
       "color_field_aggregate" => nil,
-      "x_field_bin" => false,
-      "y_field_bin" => false,
-      "color_field_bin" => false,
+      "x_field_bin" => nil,
+      "y_field_bin" => nil,
+      "color_field_bin" => nil,
       "x_field_scale_type" => nil,
       "y_field_scale_type" => nil,
       "color_field_scale_scheme" => nil,

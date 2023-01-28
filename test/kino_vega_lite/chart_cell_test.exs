@@ -26,9 +26,9 @@ defmodule KinoVegaLite.ChartCellTest do
     "x_field_aggregate" => nil,
     "y_field_aggregate" => nil,
     "color_field_aggregate" => nil,
-    "x_field_bin" => false,
-    "y_field_bin" => false,
-    "color_field_bin" => false,
+    "x_field_bin" => nil,
+    "y_field_bin" => nil,
+    "color_field_bin" => nil,
     "x_field_scale_type" => nil,
     "y_field_scale_type" => nil,
     "color_field_scale_scheme" => nil,
@@ -227,13 +227,13 @@ defmodule KinoVegaLite.ChartCellTest do
     end
 
     test "simple plot with bin" do
-      attrs = build_attrs(%{"x_field_bin" => true, "y_field" => "__count__"})
+      attrs = build_attrs(%{"x_field_bin" => 3, "y_field" => "__count__"})
 
       assert ChartCell.to_source(attrs) == """
              VegaLite.new()
              |> VegaLite.data_from_values(data, only: ["a"])
              |> VegaLite.mark(:bar)
-             |> VegaLite.encode_field(:x, "a", bin: true)
+             |> VegaLite.encode_field(:x, "a", bin: [maxbins: 3])
              |> VegaLite.encode(:y, aggregate: :count)\
              """
     end

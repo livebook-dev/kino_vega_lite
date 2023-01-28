@@ -117,7 +117,7 @@ input[type="number"] {
   flex-basis: 33%;
 }
 
-.field--xl { 
+.field--xl {
   flex-basis: 69%;
 }
 
@@ -135,6 +135,12 @@ input[type="number"] {
   cursor: pointer;
   text-align: right;
   padding-right: 14px;
+}
+
+.input.inner-number-input.input {
+  border: 1px solid var(--gray-300);
+  cursor: text;
+  width: 25%;
 }
 
 .field-with-settings {
