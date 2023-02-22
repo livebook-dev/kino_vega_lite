@@ -196,7 +196,7 @@ input[type="number"] {
 }
 
 .button--toggle .button-svg {
-  width: 0.75rem;
+  width: 0.7rem;
   height: 0.6rem;
 }
 
@@ -207,11 +207,13 @@ input[type="number"] {
 .button--sm {
   margin: 0;
   padding: 5px 0 0 10px;
+  color: var(--gray-500);
   background: transparent;
 }
 
 .button--sm:hover {
   background: transparent;
+  color: var(--gray-900);
 }
 
 .button--dashed {
@@ -302,7 +304,6 @@ input::-webkit-inner-spin-button {
   transition-property: all;
   transition-duration: 200ms;
   width: 0.95rem;
-  color: var(--gray-500);
 }
 
 .rotate--90 {
