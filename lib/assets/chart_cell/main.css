@@ -14,7 +14,9 @@
   --gray-800: #1c2a3a;
   --gray-900: #0d1829;
 
+  --blue-50: #f5f7ff;
   --blue-100: #ecf0ff;
+  --blue-200: #d8e0ff;
   --blue-600: #3e64ff;
 
   --yellow-100: #fff7ec;
@@ -39,7 +41,7 @@ pre {
 .row {
   display: flex;
   gap: 24px;
-  margin-bottom: 16px;
+  margin: 7px 0 0;
 }
 
 .root {
@@ -282,22 +284,29 @@ input::-webkit-inner-spin-button {
 }
 
 .accordion-control {
-  display: none;
+  display: flex;
+  padding: 6px;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0;
   width: auto;
   flex-grow: 1;
   color: var(--gray-700);
-  margin-bottom: 6px;
+  margin-bottom: 0px;
+  background-color: var(--blue-50);
+  border-radius: 0.5rem;
 }
 
-.accordion-open .accordion-control {
-  display: flex;
+.accordion-control.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-.accordion-open .accordion-body {
-  padding-bottom: 12px;
+.accordion-body {
+  padding: 0 6px 12px;
+}
+
+.accordion-body.expanded {
+  padding-left: 0;
 }
 
 .button-svg {
@@ -315,12 +324,26 @@ input::-webkit-inner-spin-button {
 }
 
 .layer-wrapper {
-  margin: 0 14px;
+  margin: 7px 14px;
+}
+
+.layer-wrapper.card {
+  border: 1px solid var(--blue-200);
+  border-radius: 0.5rem;
+}
+
+.accordion-control {
+  cursor: move;
+}
+
+.layer-controls {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .add-layer {
   display: flex;
-  padding: 12px 0 0 14px;
+  padding: 12px 0 0 16px;
 }
 
 .hidden-checkbox-input {
@@ -378,13 +401,17 @@ input::-webkit-inner-spin-button {
   border: 1px solid var(--gray-200);
 }
 
-/* Switch */
+/* Switch SM */
+
+.switch-sm {
+  margin-top: 3px;
+}
 
 .switch-button {
   display: inline-block;
   position: relative;
-  width: 56px;
-  height: 28px;
+  width: 28px;
+  height: 14px;
   user-select: none;
 }
 
@@ -398,12 +425,12 @@ input::-webkit-inner-spin-button {
   appearance: none;
   position: absolute;
   display: block;
-  width: 28px;
-  height: 28px;
+  width: 14px;
+  height: 14px;
   margin: 0;
   border-radius: 9999px;
   background-color: white;
-  border: 5px solid var(--gray-200);
+  border: 2.5px solid var(--gray-300);
   cursor: pointer;
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -415,7 +442,7 @@ input::-webkit-inner-spin-button {
   height: 100%;
   width: 100%;
   border-radius: 9999px;
-  background-color: var(--gray-200);
+  background-color: var(--gray-300);
   cursor: pointer;
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

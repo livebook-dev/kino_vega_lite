@@ -34,7 +34,8 @@ defmodule KinoVegaLite.ChartCellTest do
     "color_field_scale_scheme" => nil,
     "latitude_field" => nil,
     "longitude_field" => nil,
-    "geodata_color" => "blue"
+    "geodata_color" => "blue",
+    "active" => true
   }
 
   @geo_layer %{
@@ -44,7 +45,8 @@ defmodule KinoVegaLite.ChartCellTest do
     "projection_type" => "mercator",
     "geodata_feature" => nil,
     "chart_type" => "geoshape",
-    "data_variable" => nil
+    "data_variable" => nil,
+    "active" => true
   }
 
   test "returns no source when starting fresh with no data" do

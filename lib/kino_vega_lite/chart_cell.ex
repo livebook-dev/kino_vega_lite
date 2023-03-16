@@ -155,12 +155,27 @@ defmodule KinoVegaLite.ChartCell do
   end
 
   def handle_event("remove_layer", %{"layer" => idx}, ctx) do
-    updated_layers = List.delete_at(ctx.assigns.layers, idx)
+    updated_layers = List.delete_at(ctx.assigns.layers, idx) |> maybe_reactivate_layer()
     ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
     {:noreply, ctx}
   end
+
+  def handle_event("move_layer", %{"removedIndex" => remove, "addedIndex" => add}, ctx) do
+    {layer, layers} = List.pop_at(ctx.assigns.layers, remove)
+    updated_layers = List.insert_at(layers, add, layer)
+    ctx = %{ctx | assigns: %{ctx.assigns | layers: updated_layers}}
+    broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
+
+    {:noreply, ctx}
+  end
+
+  def maybe_reactivate_layer([layer]) do
+    if layer["active"], do: [layer], else: [%{layer | "active" => true}]
+  end
+
+  def maybe_reactivate_layer(layers), do: layers
 
   defp updates_for_layer(%{"chart_type" => "geoshape"}, _, _), do: %{}
 
@@ -318,7 +333,7 @@ defmodule KinoVegaLite.ChartCell do
         do: build_data_root(root, root_data_variable, layers, attrs.vl_alias),
         else: build_root(root)
 
-    layers = for layer <- layers, do: to_quoted(Map.merge(layer_root, layer))
+    layers = for layer <- layers, layer["active"], do: to_quoted(Map.merge(layer_root, layer))
     apply_layers(root, layers, attrs.vl_alias)
   end
 
@@ -623,7 +638,8 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_scale_scheme" => nil,
       "latitude_field" => nil,
       "longitude_field" => nil,
-      "geodata_color" => "blue"
+      "geodata_color" => "blue",
+      "active" => true
     }
   end
 
@@ -635,7 +651,8 @@ defmodule KinoVegaLite.ChartCell do
       "projection_type" => "mercator",
       "geodata_feature" => nil,
       "chart_type" => "geoshape",
-      "data_variable" => data_variable
+      "data_variable" => data_variable,
+      "active" => true
     }
   end
 
@@ -645,6 +662,9 @@ defmodule KinoVegaLite.ChartCell do
     if valid_lng? and valid_lat?, do: [lng, lat]
   end
 
-  defp normalize_layer(%{"chart_type" => "geoshape"} = layer), do: layer
+  defp normalize_layer(%{"chart_type" => "geoshape"} = layer) do
+    Map.merge(default_geo_layer(layer["data_variable"]), layer)
+  end
+
   defp normalize_layer(layer), do: Map.merge(default_layer(), layer)
 end
