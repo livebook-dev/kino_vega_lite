@@ -162,6 +162,15 @@ defmodule KinoVegaLite.ChartCell do
     {:noreply, ctx}
   end
 
+  def handle_event("move_layer", %{"removedIndex" => remove, "addedIndex" => add}, ctx) do
+    {layer, layers} = List.pop_at(ctx.assigns.layers, remove)
+    updated_layers = List.insert_at(layers, add, layer)
+    ctx = %{ctx | assigns: %{ctx.assigns | layers: updated_layers}}
+    broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
+
+    {:noreply, ctx}
+  end
+
   defp updates_for_layer(%{"chart_type" => "geoshape"}, _, _), do: %{}
 
   defp updates_for_layer(first_layer, data_options, ctx) do
