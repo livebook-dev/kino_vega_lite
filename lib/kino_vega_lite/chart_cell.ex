@@ -327,7 +327,7 @@ defmodule KinoVegaLite.ChartCell do
         do: build_data_root(root, root_data_variable, layers, attrs.vl_alias),
         else: build_root(root)
 
-    layers = for layer <- layers, do: to_quoted(Map.merge(layer_root, layer))
+    layers = for layer <- layers, layer["active"], do: to_quoted(Map.merge(layer_root, layer))
     apply_layers(root, layers, attrs.vl_alias)
   end
 
@@ -659,5 +659,6 @@ defmodule KinoVegaLite.ChartCell do
   defp normalize_layer(%{"chart_type" => "geoshape"} = layer) do
     Map.merge(default_geo_layer(layer["data_variable"]), layer)
   end
+
   defp normalize_layer(layer), do: Map.merge(default_layer(), layer)
 end
