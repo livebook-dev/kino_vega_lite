@@ -305,10 +305,6 @@ input::-webkit-inner-spin-button {
   padding: 0 6px 12px;
 }
 
-.accordion-open .accordion-body {
-  padding-bottom: 12px;
-}
-
 .button-svg {
   transition-property: all;
   transition-duration: 200ms;
@@ -325,6 +321,9 @@ input::-webkit-inner-spin-button {
 
 .layer-wrapper {
   margin: 7px 14px;
+}
+
+.layer-wrapper.card {
   border: 1px solid var(--blue-200);
   border-radius: 0.5rem;
 }

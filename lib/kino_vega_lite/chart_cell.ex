@@ -155,7 +155,7 @@ defmodule KinoVegaLite.ChartCell do
   end
 
   def handle_event("remove_layer", %{"layer" => idx}, ctx) do
-    updated_layers = List.delete_at(ctx.assigns.layers, idx)
+    updated_layers = List.delete_at(ctx.assigns.layers, idx) |> maybe_reactivate_layer()
     ctx = assign(ctx, layers: updated_layers)
     broadcast_event(ctx, "set_layers", %{"layers" => updated_layers})
 
@@ -170,6 +170,12 @@ defmodule KinoVegaLite.ChartCell do
 
     {:noreply, ctx}
   end
+
+  def maybe_reactivate_layer([layer]) do
+    if layer["active"], do: [layer], else: [%{layer | "active" => true}]
+  end
+
+  def maybe_reactivate_layer(layers), do: layers
 
   defp updates_for_layer(%{"chart_type" => "geoshape"}, _, _), do: %{}
 
