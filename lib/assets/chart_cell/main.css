@@ -292,8 +292,13 @@ input::-webkit-inner-spin-button {
   flex-grow: 1;
   color: var(--gray-700);
   margin-bottom: 0px;
-  background-color: var(--gray-100);
+  background-color: var(--blue-50);
   border-radius: 0.5rem;
+}
+
+.accordion-control.expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .accordion-body {
@@ -320,7 +325,7 @@ input::-webkit-inner-spin-button {
 
 .layer-wrapper {
   margin: 7px 14px;
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--blue-200);
   border-radius: 0.5rem;
 }
 
