@@ -305,6 +305,10 @@ input::-webkit-inner-spin-button {
   padding: 0 6px 12px;
 }
 
+.accordion-body.expanded {
+  padding-left: 0;
+}
+
 .button-svg {
   transition-property: all;
   transition-duration: 200ms;
