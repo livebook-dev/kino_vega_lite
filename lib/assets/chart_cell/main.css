@@ -15,6 +15,7 @@
   --gray-900: #0d1829;
 
   --blue-100: #ecf0ff;
+  --blue-200: #d8e0ff;
   --blue-600: #3e64ff;
 
   --yellow-100: #fff7ec;
@@ -282,18 +283,18 @@ input::-webkit-inner-spin-button {
 }
 
 .accordion-control {
-  display: none;
+  display: flex;
+  padding: 0 6px;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0;
   width: auto;
   flex-grow: 1;
   color: var(--gray-700);
-  margin-bottom: 6px;
+  margin-bottom: 0px;
 }
 
-.accordion-open .accordion-control {
-  display: flex;
+.accordion-body {
+  padding: 0 6px 12px;
 }
 
 .accordion-open .accordion-body {
@@ -315,12 +316,23 @@ input::-webkit-inner-spin-button {
 }
 
 .layer-wrapper {
-  margin: 0 14px;
+  margin: 7px 14px;
+  background-color: var(--gray-100);
+  border-radius: 0.5rem;
+}
+
+.layer-wrapper:hover {
+  cursor: move;
+}
+
+.layer-controls {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .add-layer {
   display: flex;
-  padding: 12px 0 0 14px;
+  padding: 12px 0 0 16px;
 }
 
 .hidden-checkbox-input {
