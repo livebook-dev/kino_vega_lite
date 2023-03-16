@@ -632,7 +632,8 @@ defmodule KinoVegaLite.ChartCell do
       "color_field_scale_scheme" => nil,
       "latitude_field" => nil,
       "longitude_field" => nil,
-      "geodata_color" => "blue"
+      "geodata_color" => "blue",
+      "active" => true
     }
   end
 
@@ -644,7 +645,8 @@ defmodule KinoVegaLite.ChartCell do
       "projection_type" => "mercator",
       "geodata_feature" => nil,
       "chart_type" => "geoshape",
-      "data_variable" => data_variable
+      "data_variable" => data_variable,
+      "active" => true
     }
   end
 
@@ -654,6 +656,8 @@ defmodule KinoVegaLite.ChartCell do
     if valid_lng? and valid_lat?, do: [lng, lat]
   end
 
-  defp normalize_layer(%{"chart_type" => "geoshape"} = layer), do: layer
+  defp normalize_layer(%{"chart_type" => "geoshape"} = layer) do
+    Map.merge(default_geo_layer(layer["data_variable"]), layer)
+  end
   defp normalize_layer(layer), do: Map.merge(default_layer(), layer)
 end
