@@ -12,7 +12,7 @@ To bring KinoVegaLite to Livebook all you need to do is `Mix.install/2`:
 
 ```elixir
 Mix.install([
-  {:kino_vega_lite, "~> 0.1.7"}
+  {:kino_vega_lite, "~> 0.1.8"}
 ])
 ```
 
