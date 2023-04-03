@@ -56,7 +56,7 @@ defmodule Kino.VegaLite do
       This option is useful when you are appending new
       data points to the plot over a long period of time
 
-    * `dataset` - name of the targetted dataset from
+    * `dataset` - name of the targeted dataset from
       the VegaLite specification. Defaults to the default
       anonymous dataset
 
@@ -91,7 +91,7 @@ defmodule Kino.VegaLite do
 
   ## Options
 
-    * `dataset` - name of the targetted dataset from
+    * `dataset` - name of the targeted dataset from
       the VegaLite specification. Defaults to the default
       anonymous dataset
 
