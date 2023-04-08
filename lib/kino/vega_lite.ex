@@ -87,6 +87,33 @@ defmodule Kino.VegaLite do
   end
 
   @doc """
+  Sends a signal event to the kino.
+
+  ## Examples
+
+      chart =
+        Vl.new(width: 400, height: 400)
+        |> Vl.mark(:line)
+        |> Vl.param("xTitle", value: "x at iteration 0")
+        |> Vl.encode_field(:x, "x", type: :quantitative, title: [signal: "xTitle"])
+        |> Vl.encode_field(:y, "y", type: :quantitative)
+        |> Kino.VegaLite.new()
+        |> Kino.render()
+
+      for i <- 1..300 do
+        point = %{x: i / 10, y: :math.sin(i / 10)}
+        Kino.VegaLite.push(chart, point)
+        Kino.VegaLite.signal(chart, "xTitle", "x at iteration " <> to_string(i))
+        Process.sleep(25)
+      end
+
+  """
+  @spec signal(t(), String.t(), term()) :: :ok
+  def signal(kino, name, value) do
+    Kino.JS.Live.cast(kino, {:signal, name, value})
+  end
+
+  @doc """
   Removes all data points from the graphic dataset.
 
   ## Options
@@ -160,6 +187,11 @@ defmodule Kino.VegaLite do
   def handle_cast({:clear, dataset}, ctx) do
     broadcast_event(ctx, "push", %{data: [], dataset: dataset, window: 0})
     ctx = update(ctx, :datasets, &Map.delete(&1, dataset))
+    {:noreply, ctx}
+  end
+
+  def handle_cast({:signal, name, value}, ctx) do
+    broadcast_event(ctx, "signal", %{name: name, value: value})
     {:noreply, ctx}
   end
 
