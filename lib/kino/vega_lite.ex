@@ -87,6 +87,32 @@ defmodule Kino.VegaLite do
   end
 
   @doc """
+  Updates a vega-lite [parameter's](https://vega.github.io/vega-lite/docs/parameter.html#variable-parameters) value.
+
+  The parameter must be registered: `VegaLite.param(vl, "param_name", opts)`.
+
+  To use the parameter in the chart, set a property to `[expr: "param_name"]`.
+
+  ## Examples
+
+      chart =
+        VegaLite.new(width: 400, height: 400)
+        |> VegaLite.param("stroke_width", value: 3)
+        |> VegaLite.mark(:line, stroke_width: [expr: "stroke_width"])
+        |> VegaLite.encode_field(:x, "x", type: :quantitative)
+        |> VegaLite.encode_field(:y, "y", type: :quantitative)
+        |> Kino.VegaLite.new()
+        |> Kino.render()
+
+      Kino.VegaLite.set_param(chart, "stroke_width", 10)
+
+  """
+  @spec set_param(t(), String.t(), term()) :: :ok
+  def set_param(kino, name, value) do
+    Kino.JS.Live.cast(kino, {:set_param, name, value})
+  end
+
+  @doc """
   Removes all data points from the graphic dataset.
 
   ## Options
@@ -160,6 +186,11 @@ defmodule Kino.VegaLite do
   def handle_cast({:clear, dataset}, ctx) do
     broadcast_event(ctx, "push", %{data: [], dataset: dataset, window: 0})
     ctx = update(ctx, :datasets, &Map.delete(&1, dataset))
+    {:noreply, ctx}
+  end
+
+  def handle_cast({:set_param, name, value}, ctx) do
+    broadcast_event(ctx, "set_param", %{name: name, value: value})
     {:noreply, ctx}
   end
 

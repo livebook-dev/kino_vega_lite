@@ -77,6 +77,14 @@ defmodule Kino.VegaLiteTest do
     end
   end
 
+  test "set_param/3 sends a set_param event" do
+    kino = start_kino()
+
+    Kino.VegaLite.set_param(kino, "param_name", "value")
+
+    assert_broadcast_event(kino, "set_param", %{name: "param_name", value: "value"})
+  end
+
   test "clear/2 pushes empty data" do
     kino = start_kino()
 
