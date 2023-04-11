@@ -97,14 +97,14 @@ defmodule Kino.VegaLite do
 
       chart =
         VegaLite.new(width: 400, height: 400)
-        |> VegaLite.param("strokeWidth", value: 3)
-        |> VegaLite.mark(:line, stroke_width: [expr: "strokeWidth"])
+        |> VegaLite.param("stroke_width", value: 3)
+        |> VegaLite.mark(:line, stroke_width: [expr: "stroke_width"])
         |> VegaLite.encode_field(:x, "x", type: :quantitative)
         |> VegaLite.encode_field(:y, "y", type: :quantitative)
         |> Kino.VegaLite.new()
         |> Kino.render()
 
-      Kino.VegaLite.set_param(chart, "strokeWidth", 10)
+      Kino.VegaLite.set_param(chart, "stroke_width", 10)
 
   """
   @spec set_param(t(), String.t(), term()) :: :ok
