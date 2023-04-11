@@ -77,12 +77,12 @@ defmodule Kino.VegaLiteTest do
     end
   end
 
-  test "signal/3 sends a signal event" do
+  test "set_param/3 sends a set_param event" do
     kino = start_kino()
 
-    Kino.VegaLite.signal(kino, "signal_name", "value")
+    Kino.VegaLite.set_param(kino, "param_name", "value")
 
-    assert_broadcast_event(kino, "signal", %{name: "signal_name", value: "value"})
+    assert_broadcast_event(kino, "set_param", %{name: "param_name", value: "value"})
   end
 
   test "clear/2 pushes empty data" do

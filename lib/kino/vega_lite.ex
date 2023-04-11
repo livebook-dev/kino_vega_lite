@@ -87,30 +87,29 @@ defmodule Kino.VegaLite do
   end
 
   @doc """
-  Sends a signal event to the kino.
+  Updates a vega-lite [parameter's](https://vega.github.io/vega-lite/docs/parameter.html#variable-parameters) value.
+
+  The parameter must be registered: `VegaLite.param(vl, "param_name", opts)`.
+
+  To use the parameter in the chart, set a property to `[expr: "param_name"]`.
 
   ## Examples
 
       chart =
-        Vl.new(width: 400, height: 400)
-        |> Vl.mark(:line)
-        |> Vl.param("xTitle", value: "x at iteration 0")
-        |> Vl.encode_field(:x, "x", type: :quantitative, title: [signal: "xTitle"])
-        |> Vl.encode_field(:y, "y", type: :quantitative)
+        VegaLite.new(width: 400, height: 400)
+        |> VegaLite.param("strokeWidth", value: 3)
+        |> VegaLite.mark(:line, stroke_width: [expr: "strokeWidth"])
+        |> VegaLite.encode_field(:x, "x", type: :quantitative)
+        |> VegaLite.encode_field(:y, "y", type: :quantitative)
         |> Kino.VegaLite.new()
         |> Kino.render()
 
-      for i <- 1..300 do
-        point = %{x: i / 10, y: :math.sin(i / 10)}
-        Kino.VegaLite.push(chart, point)
-        Kino.VegaLite.signal(chart, "xTitle", "x at iteration " <> to_string(i))
-        Process.sleep(25)
-      end
+      Kino.VegaLite.set_param(chart, "strokeWidth", 10)
 
   """
-  @spec signal(t(), String.t(), term()) :: :ok
-  def signal(kino, name, value) do
-    Kino.JS.Live.cast(kino, {:signal, name, value})
+  @spec set_param(t(), String.t(), term()) :: :ok
+  def set_param(kino, name, value) do
+    Kino.JS.Live.cast(kino, {:set_param, name, value})
   end
 
   @doc """
@@ -190,8 +189,8 @@ defmodule Kino.VegaLite do
     {:noreply, ctx}
   end
 
-  def handle_cast({:signal, name, value}, ctx) do
-    broadcast_event(ctx, "signal", %{name: name, value: value})
+  def handle_cast({:set_param, name, value}, ctx) do
+    broadcast_event(ctx, "set_param", %{name: name, value: value})
     {:noreply, ctx}
   end
 
