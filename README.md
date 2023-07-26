@@ -3,7 +3,7 @@
 [![Docs](https://img.shields.io/badge/hex.pm-docs-8e7ce6.svg)](https://hexdocs.pm/kino_vega_lite)
 [![Actions Status](https://github.com/livebook-dev/kino_vega_lite/workflows/Test/badge.svg)](https://github.com/livebook-dev/kino_vega_lite/actions)
 
-[VegaLite](https://github.com/livebook-dev/vega_lite) integration with
+[Vega-Lite](https://github.com/livebook-dev/vega_lite) integration with
 [Kino](https://github.com/livebook-dev/kino) for [Livebook](https://github.com/livebook-dev/livebook).
 
 ## Installation
