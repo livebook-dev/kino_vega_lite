@@ -76,16 +76,16 @@ defmodule KinoVegaLite.ChartCellTest do
 
     data_options = [
       %{
-        variable: "row_data",
-        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}]
+        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}],
+        variable: "row_data"
       },
       %{
-        variable: "column_data",
-        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}]
+        columns: [%{name: "x", type: "quantitative"}, %{name: "y", type: "quantitative"}],
+        variable: "column_data"
       },
       %{
-        variable: "temporal_data",
-        columns: [%{name: "x", type: "nominal"}, %{name: "y", type: "temporal"}]
+        columns: [%{name: "x", type: "nominal"}, %{name: "y", type: "temporal"}],
+        variable: "temporal_data"
       }
     ]
 

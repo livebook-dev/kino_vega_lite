@@ -555,22 +555,14 @@ defmodule KinoVegaLite.ChartCell do
 
   defp missing_dep() do
     unless Code.ensure_loaded?(VegaLite) do
-      ~s/{:vega_lite, "~> 0.1.4"}/
+      ~s/{:vega_lite, "~> 0.1.8"}/
     end
   end
 
   defp columns_for(data) do
-    with true <- implements?(Table.Reader, data),
-         data = {_, %{columns: [_ | _] = columns}, _} <- Table.Reader.init(data),
-         true <- Enum.all?(columns, &implements?(String.Chars, &1)) do
-      types = infer_types(data)
-      Enum.zip_with(columns, types, fn column, type -> %{name: to_string(column), type: type} end)
-    else
-      _ -> nil
-    end
+    if cols = VegaLite.Data.columns_for(data),
+      do: Enum.map(cols, fn {k, v} -> %{name: k, type: to_string(v)} end)
   end
-
-  defp implements?(protocol, value), do: protocol.impl_for(value) != nil
 
   defp encode(@count_field), do: :encode
   defp encode(_), do: :encode_field
@@ -589,33 +581,6 @@ defmodule KinoVegaLite.ChartCell do
       _ -> nil
     end
   end
-
-  defp infer_types({:columns, %{columns: _columns}, data}) do
-    Enum.map(data, fn data -> data |> Enum.at(0) |> type_of() end)
-  end
-
-  defp infer_types({:rows, %{columns: columns}, data}) do
-    case Enum.fetch(data, 0) do
-      {:ok, row} -> Enum.map(row, &type_of/1)
-      :error -> Enum.map(columns, fn _ -> nil end)
-    end
-  end
-
-  defp type_of(%mod{}) when mod in [Decimal], do: "quantitative"
-  defp type_of(%mod{}) when mod in [Date, NaiveDateTime, DateTime], do: "temporal"
-
-  defp type_of(data) when is_number(data), do: "quantitative"
-
-  defp type_of(data) when is_binary(data) do
-    if date?(data) or date_time?(data), do: "temporal", else: "nominal"
-  end
-
-  defp type_of(data) when is_atom(data), do: "nominal"
-
-  defp type_of(_), do: nil
-
-  defp date?(value), do: match?({:ok, _}, Date.from_iso8601(value))
-  defp date_time?(value), do: match?({:ok, _, _}, DateTime.from_iso8601(value))
 
   defp default_layer() do
     %{

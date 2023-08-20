@@ -28,7 +28,7 @@ defmodule KinoVegaLite.MixProject do
     [
       {:kino, "~> 0.7"},
       {:table, "~> 0.1.0"},
-      {:vega_lite, "~> 0.1.4"},
+      {:vega_lite, "~> 0.1.8"},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}
     ]
   end
