@@ -44,7 +44,12 @@ defmodule Kino.VegaLite do
       datasets: []
     }
 
-    Kino.JS.new(__MODULE__, data, export_info_string: "vega-lite", export_key: :spec)
+    Kino.JS.new(__MODULE__, data,
+      export: fn data -> {"vega-lite", data.spec} end,
+      # TODO: remove legacy export attributes once we require Kino v0.11.0
+      export_info_string: "vega-lite",
+      export_key: :spec
+    )
   end
 
   @doc """

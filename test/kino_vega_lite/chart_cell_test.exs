@@ -58,10 +58,10 @@ defmodule KinoVegaLite.ChartCellTest do
   test "finds tabular data in binding and sends new options to the client" do
     {kino, _source} = start_smart_cell!(ChartCell, %{})
 
-    row_data = [%{x: 1, y: 1}, %{x: 2, y: 2}]
-    column_data = %{x: 1..2, y: 1..2}
-    temporal_data = %{x: ["cats", "dogs"], y: ["2022-01-01", "2020-01-01"]}
-    invalid_data = %{self() => [1, 2], :y => [1, 2]}
+    row_data = [[x: 1, y: 1], [x: 2, y: 2]]
+    column_data = [x: 1..2, y: 1..2]
+    temporal_data = [x: ["cats", "dogs"], y: ["2022-01-01", "2020-01-01"]]
+    invalid_data = [{self(), [1, 2]}, {:y, [1, 2]}]
 
     binding = [
       row_data: row_data,
