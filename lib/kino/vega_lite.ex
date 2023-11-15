@@ -53,10 +53,14 @@ defmodule Kino.VegaLite do
 
   @doc """
   Renders and returns a new kino with the given VegaLite definition.
+
+  It is equivalent to:
+
+      vega_lite |> Kino.VegaLite.new() |> Kino.render()
   """
   @spec render(VegaLite.t()) :: t()
   def render(vl) when is_struct(vl, VegaLite) do
-    Kino.JS.Live.new(__MODULE__, vl) |> Kino.render()
+    vl |> new() |> Kino.render()
   end
 
   @doc """
