@@ -12,8 +12,7 @@ defmodule Kino.VegaLite do
         |> Vl.mark(:line)
         |> Vl.encode_field(:x, "x", type: :quantitative)
         |> Vl.encode_field(:y, "y", type: :quantitative)
-        |> Kino.VegaLite.new()
-        |> Kino.render()
+        |> Kino.VegaLite.render()
 
       for i <- 1..300 do
         point = %{x: i / 10, y: :math.sin(i / 10)}
@@ -50,6 +49,18 @@ defmodule Kino.VegaLite do
       export_info_string: "vega-lite",
       export_key: :spec
     )
+  end
+
+  @doc """
+  Renders and returns a new kino with the given VegaLite definition.
+
+  It is equivalent to:
+
+      vega_lite |> Kino.VegaLite.new() |> Kino.render()
+  """
+  @spec render(VegaLite.t()) :: t()
+  def render(vl) when is_struct(vl, VegaLite) do
+    vl |> new() |> Kino.render()
   end
 
   @doc """
@@ -145,6 +156,7 @@ defmodule Kino.VegaLite do
 
   The callback is run for the first time immediately upon registration.
   """
+  @deprecated "Use Kino.listen/3 instead"
   @spec periodically(t(), pos_integer(), term(), (term() -> {:cont, term()} | :halt)) :: :ok
   def periodically(kino, interval_ms, acc, fun) do
     Kino.JS.Live.cast(kino, {:periodically, interval_ms, acc, fun})
