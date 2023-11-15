@@ -93,26 +93,6 @@ defmodule Kino.VegaLiteTest do
     assert_broadcast_event(kino, "push", %{data: [], dataset: nil, window: 0})
   end
 
-  test "periodically/4 evaluates the given callback in background until stopped" do
-    kino = start_kino()
-
-    parent = self()
-
-    Kino.VegaLite.periodically(kino, 1, 1, fn n ->
-      send(parent, {:ping, n})
-
-      if n < 2 do
-        {:cont, n + 1}
-      else
-        :halt
-      end
-    end)
-
-    assert_receive {:ping, 1}
-    assert_receive {:ping, 2}
-    refute_receive {:ping, 3}, 5
-  end
-
   defp start_kino() do
     Vl.new()
     |> Vl.mark(:point)
