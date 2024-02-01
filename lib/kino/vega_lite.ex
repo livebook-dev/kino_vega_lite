@@ -22,7 +22,7 @@ defmodule Kino.VegaLite do
 
   """
 
-  use Kino.JS, assets_path: "lib/assets/vega_lite"
+  use Kino.JS, assets_path: "lib/assets/vega_lite/build"
   use Kino.JS.Live
 
   @type t :: Kino.JS.Live.t()

@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "esbuild main.js --bundle --minify --outfile=../../lib/assets/vega_lite/build/main.js --format=esm --loader:.js=jsx",
+    "dev": "npm run build -- --watch"
+  },
+  "dependencies": {
+    "vega": "^5.27.0",
+    "vega-embed": "^6.24.0",
+    "vega-lite": "^5.16.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.15.16"
+  }
+}

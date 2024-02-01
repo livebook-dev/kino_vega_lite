@@ -1,6 +1,5 @@
-import "https://cdn.jsdelivr.net/npm/vega@5.25.0";
-import "https://cdn.jsdelivr.net/npm/vega-lite@5.9.1";
-import "https://cdn.jsdelivr.net/npm/vega-embed@6.22.1";
+import vegaEmbed from "vega-embed";
+import { changeset } from "vega";
 
 // See https://github.com/vega/vega-lite/blob/b61b13c2cbd4ecde0448544aff6cdaea721fd22a/src/compile/data/assemble.ts#L228-L231
 const DEFAULT_DATASET_NAME = "source_0";
@@ -167,16 +166,16 @@ export function init(ctx, data) {
 
 function buildChangeset(currentData, newData, window) {
   if (window === 0) {
-    return vega.changeset().remove(currentData);
+    return changeset().remove(currentData);
   } else if (window) {
     const toInsert = newData.slice(-window);
     const freeSpace = Math.max(window - toInsert.length, 0);
     const toRemove =
       freeSpace === 0 ? currentData : currentData.slice(0, -freeSpace);
 
-    return vega.changeset().remove(toRemove).insert(toInsert);
+    return changeset().remove(toRemove).insert(toInsert);
   } else {
-    return vega.changeset().insert(newData);
+    return changeset().insert(newData);
   }
 }
 
