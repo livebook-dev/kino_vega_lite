@@ -93,6 +93,27 @@ defmodule Kino.VegaLiteTest do
     assert_broadcast_event(kino, "push", %{data: [], dataset: nil, window: 0})
   end
 
+  test "configure/2" do
+    # with invalid theme
+    assert_raise ArgumentError,
+                 "expected :theme to be either :livebook or nil, got: :invalid",
+                 fn -> Kino.VegaLite.configure(theme: :invalid) end
+
+    # with default theme
+    kino = start_kino()
+
+    data = connect(kino)
+    assert %{config: %{theme: :livebook}} = data
+
+    # with empty theme
+    Kino.VegaLite.configure(theme: nil)
+
+    kino = start_kino()
+
+    data = connect(kino)
+    assert %{config: %{theme: nil}} = data
+  end
+
   defp start_kino() do
     Vl.new()
     |> Vl.mark(:point)

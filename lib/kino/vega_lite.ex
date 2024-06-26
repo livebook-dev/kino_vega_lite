@@ -40,7 +40,8 @@ defmodule Kino.VegaLite do
   def static(vl) when is_struct(vl, VegaLite) do
     data = %{
       spec: VegaLite.to_spec(vl),
-      datasets: []
+      datasets: [],
+      config: config()
     }
 
     Kino.JS.new(__MODULE__, data,
@@ -49,6 +50,27 @@ defmodule Kino.VegaLite do
       export_info_string: "vega-lite",
       export_key: :spec
     )
+  end
+
+  @doc """
+  Applies global configuration options for the VegaLite kinos.
+
+  ## Options
+
+    * `:theme` - the theme to be applied on the rendered VegaLite
+      charts. Currently the only supported theme is `:livebook`. If
+      set to `nil`, no theme is applied. Defaults to `:livebook`.
+  """
+  @spec configure(keyword()) :: :ok
+  def configure(opts) do
+    opts = Keyword.validate!(opts, theme: :livebook)
+
+    unless opts[:theme] in [nil, :livebook] do
+      raise ArgumentError,
+            "expected :theme to be either :livebook or nil, got: #{inspect(opts[:theme])}"
+    end
+
+    Application.put_all_env(kino_vega_lite: opts)
   end
 
   @doc """
@@ -164,7 +186,7 @@ defmodule Kino.VegaLite do
 
   @impl true
   def init(vl, ctx) do
-    {:ok, assign(ctx, vl: vl, datasets: %{})}
+    {:ok, assign(ctx, vl: vl, datasets: %{}, config: config())}
   end
 
   @compile {:no_warn_undefined, {VegaLite, :to_spec, 1}}
@@ -173,7 +195,8 @@ defmodule Kino.VegaLite do
   def handle_connect(ctx) do
     data = %{
       spec: VegaLite.to_spec(ctx.assigns.vl),
-      datasets: for({dataset, data} <- ctx.assigns.datasets, do: [dataset, data])
+      datasets: for({dataset, data} <- ctx.assigns.datasets, do: [dataset, data]),
+      config: ctx.assigns.config
     }
 
     {:ok, data, ctx}
@@ -230,5 +253,13 @@ defmodule Kino.VegaLite do
       :halt ->
         :ok
     end
+  end
+
+  defp config do
+    default_config = [theme: :livebook]
+
+    default_config
+    |> Keyword.merge(Application.get_all_env(:kino_vega_lite))
+    |> Map.new()
   end
 end
