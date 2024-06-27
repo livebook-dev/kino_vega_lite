@@ -120,15 +120,17 @@ export function init(ctx, data) {
     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap"
   );
 
-  const { spec, datasets } = data;
+  const { spec, datasets, config } = data;
 
   if (!spec.data) {
     spec.data = { values: [] };
   }
 
+  let theme = config.theme === "livebook" ? livebookTheme : {};
+
   const options = {
     actions: { export: true, source: false, compiled: false, editor: false },
-    config: livebookTheme,
+    config: theme,
   };
 
   vegaEmbed(ctx.root, spec, options)
