@@ -129,7 +129,7 @@ export function init(ctx, data) {
   let theme = config.theme === "livebook" ? livebookTheme : {};
 
   const options = {
-    actions: { export: true, source: true, compiled: false, editor: true },
+    actions: config.actions ? { export: true, source: true, compiled: false, editor: true } : false,
     config: theme,
   };
 
