@@ -60,10 +60,16 @@ defmodule Kino.VegaLite do
     * `:theme` - the theme to be applied on the rendered VegaLite
       charts. Currently the only supported theme is `:livebook`. If
       set to `nil`, no theme is applied. Defaults to `:livebook`.
+    * `:actions` - Default to `true` to show the actions bubble, set to `false` to hide it completely,
+
   """
   @spec configure(keyword()) :: :ok
   def configure(opts) do
-    opts = Keyword.validate!(opts, theme: :livebook)
+    opts =
+      Keyword.validate!(opts,
+        theme: :livebook,
+        actions: true
+      )
 
     unless opts[:theme] in [nil, :livebook] do
       raise ArgumentError,
@@ -256,7 +262,7 @@ defmodule Kino.VegaLite do
   end
 
   defp config do
-    default_config = [theme: :livebook]
+    default_config = [theme: :livebook, actions: true]
 
     default_config
     |> Keyword.merge(Application.get_all_env(:kino_vega_lite))

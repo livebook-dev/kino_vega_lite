@@ -112,6 +112,23 @@ defmodule Kino.VegaLiteTest do
 
     data = connect(kino)
     assert %{config: %{theme: nil}} = data
+
+    # with default
+    kino = start_kino()
+
+    data = connect(kino)
+
+    assert %{config: %{actions: true}} =
+             data
+
+    # with custom actions
+    Kino.VegaLite.configure(actions: false)
+
+    kino = start_kino()
+
+    data = connect(kino)
+
+    assert %{config: %{actions: false}} = data
   end
 
   defp start_kino() do
