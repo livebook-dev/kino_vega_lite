@@ -103,25 +103,17 @@ defmodule Kino.VegaLiteTest do
     kino = start_kino()
 
     data = connect(kino)
-    assert %{config: %{theme: :livebook}} = data
+    assert %{config: %{theme: :livebook, actions: true}} = data
 
     # with empty theme
     Kino.VegaLite.configure(theme: nil)
-
     kino = start_kino()
 
     data = connect(kino)
     assert %{config: %{theme: nil}} = data
 
-    # with default
-    kino = start_kino()
-
-    data = connect(kino)
-    assert %{config: %{actions: true}} = data
-
-    # with custom actions
+    # with actions disabled
     Kino.VegaLite.configure(actions: false)
-
     kino = start_kino()
 
     data = connect(kino)
