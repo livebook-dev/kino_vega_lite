@@ -117,9 +117,7 @@ defmodule Kino.VegaLiteTest do
     kino = start_kino()
 
     data = connect(kino)
-
-    assert %{config: %{actions: true}} =
-             data
+    assert %{config: %{actions: true}} = data
 
     # with custom actions
     Kino.VegaLite.configure(actions: false)
@@ -127,7 +125,6 @@ defmodule Kino.VegaLiteTest do
     kino = start_kino()
 
     data = connect(kino)
-
     assert %{config: %{actions: false}} = data
   end
 
