@@ -60,7 +60,9 @@ defmodule Kino.VegaLite do
     * `:theme` - the theme to be applied on the rendered VegaLite
       charts. Currently the only supported theme is `:livebook`. If
       set to `nil`, no theme is applied. Defaults to `:livebook`.
-    * `:actions` - Default to `true` to show the actions bubble, set to `false` to hide it completely,
+
+    * `:actions` - whether to show the menu with export actions.
+      Defaults to `true`.
 
   """
   @spec configure(keyword()) :: :ok
